@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SortableJS</title>
+  </head>
+
+  <style>
+    .list-group .list-group-item {
+      border-radius: 0;
+      cursor: move;
+    }
+
+    .list-group .list-group-item:hover {
+      background-color: #f7f7f7;
+    }
+  </style>
+
+  <body>
+    <div class="container">
+      <h2>Sortable List</h2>
+      Item <input type="text" id="item" name="item" /> Amount
+      <input type="number" id="amount" name="amount" /> Gasolin
+      <input type="number" id="gasolin" name="gasolin" />
+
+      <button type="button" onclick="addToList">Add</button>
+      <button type="button" onclick="removeFromList">Remove</button>
+
+      <hr />
+
+      <div id="example1" class="list-group col"></div>
+    </div>
+
+    <!-- Latest Sortable -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script>
+      new Sortable(example1, {
+        animation: 150,
+        ghostClass: "sortable-ghost",
+      });
+
+      function addToList() {
+        console.log("hallo");
+        var itemListArray = JSON.parse(localStorage.getItem("ItemToSell")) || [];
+        var name = document.getElementById("item").value;
+        var count = Number(document.getElementById("amount").value);
+        var gasolin = Number(document.getElementById("gasolin").value);
+
+        if (itemListArray.findIndex((e) => e.name === name) > -1) {
+          itemListArray.splice(
+            itemListArray.findIndex((e) => e.name === name),
+            1
+          );
+        }
+
+        if (!gasolin) {
+          gasolin = 0;
+        }
+
+        if (count < 10) {
+          count = 10;
+        }
+
+        itemListArray.push({ name: name, count: count, gasolin: gasolin });
+
+        localStorage.setItem("ItemToSell", JSON.stringify(itemListArray));
+
+        var option = document.createElement("div");
+        option.className = "list-group-item";
+        option.innerHTML = name + " sell at: " + count + "gasolin < " + gasolin;
+        document.getElementById("example1").appendChild(option);
+      }
+
+      function removeFromList() {
+        var itemListArray = JSON.parse(localStorage.getItem("ItemToSell"));
+        if (
+          itemListArray.findIndex(
+            (e) =>
+              e.name === document.getElementById("ListOfAllItemInput").value
+          ) > -1
+        ) {
+          itemListArray.splice(
+            itemListArray.findIndex(
+              (e) =>
+                e.name === document.getElementById("ListOfAllItemInput").value
+            ),
+            1
+          );
+        }
+        localStorage.setItem("ItemToSell", JSON.stringify(itemListArray));
+      }
+    </script>
+  </body>
+</html>

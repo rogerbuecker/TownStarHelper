@@ -7,7 +7,6 @@
 // @match        https://townstar.sandbox-games.com/launch/
 // @require      https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js
-// @resource     IMPORTED_CSS https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
 // @grant        GM_setValue
@@ -19,9 +18,6 @@
 
 (function () {
   "use strict";
-
-  const my_css = GM_getResourceText("IMPORTED_CSS");
-  //GM_addStyle(my_css);
 
   const sellTimer = 5; // Seconds between selling
   var craftedItem = [];
