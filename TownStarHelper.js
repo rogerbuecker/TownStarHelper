@@ -645,7 +645,7 @@
               }
             }
           }
-          if (woodInNeed >= Game.town.GetStoredCrafts()["Wood"]) {
+          if ((woodInNeed + parseInt(WoodStop.value)) >= Game.town.GetStoredCrafts()["Wood"]) {
             isConstructionNeedWood = true;
           }
         }
