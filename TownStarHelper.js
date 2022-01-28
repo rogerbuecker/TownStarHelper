@@ -163,6 +163,10 @@
       Number(document.getElementById("EnergyStop").value)
     );
     localStorage.setItem(
+      "WaterStop",
+      Number(document.getElementById("WaterStop").value)
+    );
+    localStorage.setItem(
       "AutoComplete",
       document.getElementById("AutoCompleteCheckBox").checked
     );
@@ -258,6 +262,7 @@
     var sLaborCost = localStorage.getItem("LaborCost");
     var sWoodStop = localStorage.getItem("WoodStop");
     var sEnergyStop = localStorage.getItem("EnergyStop");
+    var sWaterStop = localStorage.getItem("WaterStop");
     var sAutoComplete = localStorage.getItem("AutoComplete");
     var sStartSelling = localStorage.getItem("StartSelling");
     var sClearConsole = localStorage.getItem("ClearConsole");
@@ -297,6 +302,7 @@
     var LaborCost = document.createElement("Input");
     var WoodStop = document.createElement("Input");
     var EnergyStop = document.createElement("Input");
+    var WaterStop = document.createElement("Input");
     var ClearConsoleLogCheckBox = document.createElement("Input");
     var CollectTownCoinCheckBox = document.createElement("Input");
 
@@ -401,6 +407,20 @@
     EnergyStop.value = 8;
     if (sEnergyStop != null) {
       EnergyStop.value = Number(sEnergyStop);
+    }
+
+    WaterStop.type = "number";
+    WaterStop.style.height = "10px";
+    WaterStop.style.width = "50px";
+    WaterStop.style.fontSize = "12px";
+    WaterStop.style.padding = "4px";
+    WaterStop.style.marginLeft = "5px";
+    WaterStop.style.borderRadius = "0px";
+    WaterStop.style.textAlign = "right";
+    WaterStop.setAttribute("id", "WaterStop");
+    WaterStop.value = 10;
+    if (sWaterStop != null) {
+      WaterStop.value = Number(sWaterStop);
     }
 
     StartSellingCheckBox.type = "checkbox";
