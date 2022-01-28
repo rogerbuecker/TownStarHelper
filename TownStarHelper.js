@@ -601,6 +601,7 @@
       }
 
       if (ConstructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
+        var woodInNeed = 0;
         for (i = 0; i < ConstructionSiteArray.length; i++) {
           if (ConstructionSiteArray[i].logicObject.data.state == "Complete") {
             if (
@@ -621,11 +622,31 @@
                   ConstructionSiteArray[i].logicObject.constructionData.reqs
                     .Wood
               ) {
-                console.log('logicObject.data.receivedCrafts.Wood < logicObject.constructionData.reqs');
-                console.log(ConstructionSiteArray[i].logicObject);
-                isConstructionNeedWood = true;
+                var parsedWoodRequired = parseInt(
+                  ConstructionSiteArray[i].logicObject.constructionData.reqs
+                    .Wood
+                );
+                var parsedWoodRecived = parseInt(
+                  ConstructionSiteArray[i].logicObject.data.receivedCrafts.Wood
+                );
+
+                if (isNaN(parsedWoodRequired)) {
+                  parsedWoodRequired = 0;
+                }
+                if (isNaN(parsedWoodRecived)) {
+                  parsedWoodRecived = 0;
+                }
+
+                //console.log(parsedWoodRequired);
+                //console.log(parsedWoodRecived);
+
+                woodInNeed += parsedWoodRequired - parsedWoodRecived;
+                //console.log(woodInNeed);
               }
             }
+          }
+          if (woodInNeed >= Game.town.GetStoredCrafts()["Wood"]) {
+            isConstructionNeedWood = true;
           }
         }
       }
