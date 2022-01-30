@@ -8,6 +8,7 @@
 // @grant        GM_setValue
 // @grant        GM_listValues
 // @grant        GM_getValue
+// @require      https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js
 // @grant        GM_deleteValue
 // @run-at       document-start
 // ==/UserScript==
@@ -16,7 +17,7 @@
   "use strict";
 
   const sellTimer = 20; // Seconds between selling
-  var craftedItem = [];
+  //var craftedItem = [];
   var trackedItems = [];
   let sellingActive = 0;
   let trackingActive = 0;
@@ -84,7 +85,7 @@
     }
   }).observe(document, { attributes: true, childList: true, subtree: true });
 
-  function addToList() {
+  /*   function addToList() {
     var itemListArray = JSON.parse(document.getElementById("configTxt").value);
     if (
       itemListArray.findIndex(
@@ -122,10 +123,12 @@
       );
     }
     document.getElementById("configTxt").value = JSON.stringify(itemListArray);
-  }
+  } */
 
   function LoadConfig() {
     document.getElementById("ConfigDiv").style.visibility = "visible";
+    document.getElementById("configBtn").style.display = "none";
+
     //To close all fullscreens
     for (
       var i = 0;
@@ -138,6 +141,7 @@
 
   function CloseConfig() {
     document.getElementById("ConfigDiv").style.visibility = "hidden";
+    document.getElementById("configBtn").style.display = "block";
     localStorage.setItem(
       "LumberMill",
       document.getElementById("LumberMillCheckBox").checked
@@ -178,10 +182,10 @@
       "ClearConsole",
       document.getElementById("ClearConsoleCheckBox").checked
     );
-    localStorage.setItem(
+    /* localStorage.setItem(
       "ItemToSell",
       document.getElementById("configTxt").value
-    );
+    ); */
   }
 
   function ClearData() {
@@ -268,15 +272,15 @@
     var sClearConsole = localStorage.getItem("ClearConsole");
     var sCollectTownCoin = localStorage.getItem("CollectTownCoin");
 
-    if (listItem != null) {
+    /* if (listItem != null) {
       craftedItem = JSON.parse(listItem);
-    }
+    } */
 
     var sellingAmount = document.createElement("Input");
-    var addToListBtn = document.createElement("BUTTON");
-    var removeListBtn = document.createElement("BUTTON");
+    /*     var addToListBtn = document.createElement("BUTTON");
+    var removeListBtn = document.createElement("BUTTON"); */
 
-    var itemlistInput = document.createElement("Input");
+    /* var itemlistInput = document.createElement("Input");
     itemlistInput.id = "ListOfAllItemInput";
     itemlistInput.setAttribute("list", "ListOfAllItem");
 
@@ -285,16 +289,53 @@
 
     for (var item in Game.craftData) {
       var option = document.createElement("option");
+      var itemInfo = item + ' ' + item.CityPoints + 'pt ' + item.CityPrice + '$';
       option.value = item;
+      option.innerHTML = itemInfo;
       itemlist.appendChild(option);
+    } */
+
+    var bothItemList = document.createElement("DIV");
+    bothItemList.setAttribute("style", "height:45%;");
+
+    var allItemsList = document.createElement("DIV");
+    allItemsList.setAttribute(
+      "style",
+      "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
+    );
+    allItemsList.id = "allItemsList";
+
+    for (var key in Game.craftData) {
+      const item = Game.craftData[key];
+      var option = document.createElement("DIV");
+      var itemInfo = key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
+      option.innerText = key;
+      option.title = itemInfo;
+      option.setAttribute("data-key", key);
+      allItemsList.appendChild(option);
     }
+
+    var activeItemList = document.createElement("DIV");
+    activeItemList.setAttribute(
+      "style",
+      "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
+    );
+    activeItemList.id = "activeItemsList";
+
+    /* var activeItem = document.createElement("DIV");
+    activeItem.innerText = 'Item 1';
+    activeItem.className = 'list-group-item tinted';
+    activeItemList.append(activeItem); */
+
+    bothItemList.append(allItemsList);
+    bothItemList.append(activeItemList);
 
     var node = document.createElement("DIV");
     var Loadbtn = document.createElement("BUTTON");
     var node2 = document.createElement("DIV");
     var Savebtn = document.createElement("BUTTON");
     var ClearStorageDataBtn = document.createElement("BUTTON");
-    var text = document.createElement("TEXTAREA");
+    //var text = document.createElement("TEXTAREA");
     var lumberMillCheckBox = document.createElement("Input");
     var waterFacilityCheckBox = document.createElement("Input");
     var RefineryCheckBox = document.createElement("Input");
@@ -320,9 +361,9 @@
     ClearStorageDataBtn.textContent = "Clear Storage Data";
     ClearStorageDataBtn.onclick = ClearData;
 
-    text.setAttribute("readonly", "true");
+    /*  text.setAttribute("readonly", "true");
     text.setAttribute("id", "configTxt");
-    text.setAttribute("style", "height:100px;width:380px;");
+    text.setAttribute("style", "height:100px;width:380px;"); */
     lumberMillCheckBox.type = "checkbox";
     lumberMillCheckBox.style.height = "12px";
     lumberMillCheckBox.setAttribute("id", "LumberMillCheckBox");
@@ -471,15 +512,15 @@
     sellingAmount.setAttribute("id", "SellingAmount");
     sellingAmount.min = 10;
     sellingAmount.value = 10;
-
+    /* 
     itemlist.style.fontSize = "13px";
     itemlist.style.margin = "5px";
 
     itemlistInput.style.fontSize = "13px";
     itemlistInput.style.margin = "5px";
-    itemlistInput.style.height = "25px";
+    itemlistInput.style.height = "25px"; */
 
-    addToListBtn.style.marginLeft = "10px";
+    /*     addToListBtn.style.marginLeft = "10px";
     addToListBtn.id = "AddBtn";
     addToListBtn.textContent = "Add";
     addToListBtn.onclick = addToList;
@@ -487,24 +528,30 @@
     removeListBtn.style.marginLeft = "10px";
     removeListBtn.id = "RemoveBtn";
     removeListBtn.textContent = "Remove";
-    removeListBtn.onclick = removeFromList;
+    removeListBtn.onclick = removeFromList; */
 
-    node2.append("Item:");
-    node2.appendChild(itemlist);
-    node2.appendChild(itemlistInput);
+    var x = document.createElement("STRONG");
+    var t = document.createTextNode("Items:");
+    x.appendChild(t);
 
-    node2.append("Amount:");
+    node2.append(x);
+    node2.append(bothItemList);
 
-    node2.appendChild(sellingAmount);
+    /*  node2.appendChild(itemlist);
+    node2.appendChild(itemlistInput); */
+
+    //node2.append("Amount:");
+
+    /*     node2.appendChild(sellingAmount);
     node2.appendChild(addToListBtn);
-    node2.appendChild(removeListBtn);
-    node2.appendChild(document.createElement("hr"));
-
+    node2.appendChild(removeListBtn); */
+    /*     node2.appendChild(document.createElement("hr"));
+     */
     node2.setAttribute(
       "style",
-      "position: fixed;z-index: 1000;width: 35%;height: 100%;background-color: #edededd6;visibility:hidden"
+      "position: fixed;z-index: 1000; left: 25%; width: 50%; height: 100%;background-color: #edededd6;visibility:hidden; padding: 10px"
     );
-    node2.appendChild(text);
+    //node2.appendChild(text);
 
     node2.appendChild(document.createElement("hr"));
     node2.append("Turn on/off Lumber Mill :");
@@ -553,8 +600,54 @@
 
     node.appendChild(node2);
     node.setAttribute("style", "position:fixed;z-index:1000");
-    text.value = JSON.stringify(craftedItem);
+    //text.value = JSON.stringify(craftedItem);
     document.getElementsByTagName("Body")[0].appendChild(node);
+
+    var allItemsList = document.getElementById("allItemsList");
+    var activeItemsList = document.getElementById("activeItemsList");
+
+    var sortAll = Sortable.create(allItemsList, {
+      group: {
+        name: "shared",
+      },
+      animation: 150,
+      sort: false, // To disable sorting: set sort to false
+    });
+    var sortActive = Sortable.create(activeItemsList, {
+      group: "shared",
+      onAdd: (evt) => {
+        evt.item.onclick = function (clickEvent) {
+          if (
+            !clickEvent.shiftKey &&
+            parseInt(evt.item.getAttribute("data-amount")) >= 10
+          ) {
+            evt.item.setAttribute(
+              "data-amount",
+              parseInt(evt.item.getAttribute("data-amount")) + 1
+            );
+          } else if (
+            clickEvent.shiftKey &&
+            parseInt(evt.item.getAttribute("data-amount")) >= 11
+          ) {
+            evt.item.setAttribute(
+              "data-amount",
+              parseInt(evt.item.getAttribute("data-amount")) - 1
+            );
+          }
+
+          evt.item.textContent =
+            evt.item.getAttribute("data-key") +
+            " Amount:" +
+            evt.item.getAttribute("data-amount");
+        };
+        evt.item.setAttribute("data-amount", 20);
+        evt.item.textContent =
+          evt.item.getAttribute("data-key") +
+          " Amount:" +
+          evt.item.getAttribute("data-amount");
+      },
+      animation: 150,
+    });
 
     let start = GM_getValue("start", Date.now());
     GM_setValue("start", start);
@@ -585,6 +678,12 @@
       var ConstructionSiteArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Construction_Site"
       );
+      //ToDo: If storage is full check if you can sell something
+      var StorageArray = Object.values(Game.town.objectDict).filter(
+        (o) => o.logicType === "Storage"
+      );
+      console.log(StorageArray);
+
       var isConstructionNeedWood = false;
       var depotObj = "";
       var busyDepotKey = "";
@@ -645,7 +744,10 @@
               }
             }
           }
-          if ((woodInNeed + parseInt(WoodStop.value)) >= Game.town.GetStoredCrafts()["Wood"]) {
+          if (
+            woodInNeed + parseInt(WoodStop.value) >=
+            Game.town.GetStoredCrafts()["Wood"]
+          ) {
             isConstructionNeedWood = true;
           }
         }
@@ -743,12 +845,23 @@
       if (Game.town.GetStoredCrafts()["Gasoline"] > 0) {
         var itemtoSell;
         var nCountItem;
-        var craftedItem = JSON.parse(
+        /* var craftedItem = JSON.parse(
           document.getElementById("configTxt").value
         );
+
+        for (var item in craftedItem) {
+          item.points = Game.craftData[item.name].CityPoints;
+          item.price = Game.craftData[item.name].CityPrice;
+        }
+
+        console.log(craftedItem); */
+
+        var activeItemsList = document.getElementById("activeItemsList");
+        var craftedItem = activeItemsList.getElementsByTagName("DIV");
+
         for (i = 0; i < craftedItem.length; i++) {
-          itemtoSell = craftedItem[i].name;
-          nCountItem = craftedItem[i].count;
+          itemtoSell = craftedItem[i].getAttribute("data-key");
+          nCountItem = craftedItem[i].getAttribute("data-amount");
           if (Game.town.GetStoredCrafts()[itemtoSell] != undefined) {
             if (Game.town.GetStoredCrafts()[itemtoSell] >= nCountItem) {
               break;
