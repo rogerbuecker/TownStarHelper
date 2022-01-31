@@ -8,7 +8,7 @@
 // @grant        GM_setValue
 // @grant        GM_listValues
 // @grant        GM_getValue
-// @require      https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js
+// @require      https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js
 // @grant        GM_deleteValue
 // @run-at       document-start
 // ==/UserScript==
@@ -17,7 +17,6 @@
   "use strict";
 
   const sellTimer = 20; // Seconds between selling
-  //var craftedItem = [];
   var trackedItems = [];
   let sellingActive = 0;
   let trackingActive = 0;
@@ -85,46 +84,6 @@
     }
   }).observe(document, { attributes: true, childList: true, subtree: true });
 
-  /*   function addToList() {
-    var itemListArray = JSON.parse(document.getElementById("configTxt").value);
-    if (
-      itemListArray.findIndex(
-        (e) => e.name === document.getElementById("ListOfAllItemInput").value
-      ) > -1
-    ) {
-      itemListArray.splice(
-        itemListArray.findIndex(
-          (e) => e.name === document.getElementById("ListOfAllItemInput").value
-        ),
-        1
-      );
-    }
-    var count = Number(document.getElementById("SellingAmount").value);
-    var name = document.getElementById("ListOfAllItemInput").value;
-    if (count < 10) {
-      count = 10;
-    }
-    itemListArray.push({ name: name, count: count });
-    document.getElementById("configTxt").value = JSON.stringify(itemListArray);
-  }
-
-  function removeFromList() {
-    var itemListArray = JSON.parse(document.getElementById("configTxt").value);
-    if (
-      itemListArray.findIndex(
-        (e) => e.name === document.getElementById("ListOfAllItemInput").value
-      ) > -1
-    ) {
-      itemListArray.splice(
-        itemListArray.findIndex(
-          (e) => e.name === document.getElementById("ListOfAllItemInput").value
-        ),
-        1
-      );
-    }
-    document.getElementById("configTxt").value = JSON.stringify(itemListArray);
-  } */
-
   function LoadConfig() {
     document.getElementById("ConfigDiv").style.visibility = "visible";
     document.getElementById("configBtn").style.display = "none";
@@ -178,18 +137,6 @@
       "StartSelling",
       document.getElementById("StartSellingCheckBox").checked
     );
-    localStorage.setItem(
-      "ClearConsole",
-      document.getElementById("ClearConsoleCheckBox").checked
-    );
-    /* localStorage.setItem(
-      "ItemToSell",
-      document.getElementById("configTxt").value
-    ); */
-  }
-
-  function ClearData() {
-    localStorage.removeItem("ItemToSell");
   }
 
   async function collectTownCoinIfNeedet() {
@@ -259,7 +206,6 @@
   }
 
   function activateSelling() {
-    var listItem = localStorage.getItem("ItemToSell");
     var sLumberMill = localStorage.getItem("LumberMill");
     var sWaterFacility = localStorage.getItem("WaterFacility");
     var sRefinery = localStorage.getItem("Refinery");
@@ -269,36 +215,14 @@
     var sWaterStop = localStorage.getItem("WaterStop");
     var sAutoComplete = localStorage.getItem("AutoComplete");
     var sStartSelling = localStorage.getItem("StartSelling");
-    var sClearConsole = localStorage.getItem("ClearConsole");
     var sCollectTownCoin = localStorage.getItem("CollectTownCoin");
 
-    /* if (listItem != null) {
-      craftedItem = JSON.parse(listItem);
-    } */
-
-    var sellingAmount = document.createElement("Input");
-    /*     var addToListBtn = document.createElement("BUTTON");
-    var removeListBtn = document.createElement("BUTTON"); */
-
-    /* var itemlistInput = document.createElement("Input");
-    itemlistInput.id = "ListOfAllItemInput";
-    itemlistInput.setAttribute("list", "ListOfAllItem");
-
-    var itemlist = document.createElement("datalist");
-    itemlist.id = "ListOfAllItem";
-
-    for (var item in Game.craftData) {
-      var option = document.createElement("option");
-      var itemInfo = item + ' ' + item.CityPoints + 'pt ' + item.CityPrice + '$';
-      option.value = item;
-      option.innerHTML = itemInfo;
-      itemlist.appendChild(option);
-    } */
-
     var bothItemList = document.createElement("DIV");
+    var allItemsList = document.createElement("DIV");
+    var activeItemList = document.createElement("DIV");
+
     bothItemList.setAttribute("style", "height:45%;");
 
-    var allItemsList = document.createElement("DIV");
     allItemsList.setAttribute(
       "style",
       "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
@@ -315,17 +239,11 @@
       allItemsList.appendChild(option);
     }
 
-    var activeItemList = document.createElement("DIV");
     activeItemList.setAttribute(
       "style",
       "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
     );
     activeItemList.id = "activeItemsList";
-
-    /* var activeItem = document.createElement("DIV");
-    activeItem.innerText = 'Item 1';
-    activeItem.className = 'list-group-item tinted';
-    activeItemList.append(activeItem); */
 
     bothItemList.append(allItemsList);
     bothItemList.append(activeItemList);
@@ -334,8 +252,6 @@
     var Loadbtn = document.createElement("BUTTON");
     var node2 = document.createElement("DIV");
     var Savebtn = document.createElement("BUTTON");
-    var ClearStorageDataBtn = document.createElement("BUTTON");
-    //var text = document.createElement("TEXTAREA");
     var lumberMillCheckBox = document.createElement("Input");
     var waterFacilityCheckBox = document.createElement("Input");
     var RefineryCheckBox = document.createElement("Input");
@@ -344,7 +260,6 @@
     var WoodStop = document.createElement("Input");
     var EnergyStop = document.createElement("Input");
     var WaterStop = document.createElement("Input");
-    var ClearConsoleLogCheckBox = document.createElement("Input");
     var CollectTownCoinCheckBox = document.createElement("Input");
 
     var StartSellingCheckBox = document.createElement("Input");
@@ -356,14 +271,6 @@
     Savebtn.textContent = "Close config";
     Savebtn.onclick = CloseConfig;
 
-    ClearStorageDataBtn.setAttribute("style", "margin-left:10px;");
-    ClearStorageDataBtn.setAttribute("id", "ClearDataBtn");
-    ClearStorageDataBtn.textContent = "Clear Storage Data";
-    ClearStorageDataBtn.onclick = ClearData;
-
-    /*  text.setAttribute("readonly", "true");
-    text.setAttribute("id", "configTxt");
-    text.setAttribute("style", "height:100px;width:380px;"); */
     lumberMillCheckBox.type = "checkbox";
     lumberMillCheckBox.style.height = "12px";
     lumberMillCheckBox.setAttribute("id", "LumberMillCheckBox");
@@ -475,18 +382,6 @@
       }
     }
 
-    ClearConsoleLogCheckBox.type = "checkbox";
-    ClearConsoleLogCheckBox.style.height = "12px";
-    ClearConsoleLogCheckBox.setAttribute("id", "ClearConsoleCheckBox");
-    ClearConsoleLogCheckBox.checked = true;
-    if (sClearConsole != null) {
-      if (sClearConsole == "false") {
-        ClearConsoleLogCheckBox.checked = false;
-      } else {
-        ClearConsoleLogCheckBox.checked = true;
-      }
-    }
-
     CollectTownCoinCheckBox.type = "checkbox";
     CollectTownCoinCheckBox.style.height = "12px";
     CollectTownCoinCheckBox.setAttribute("id", "CollectTownCoinCheckBox");
@@ -502,34 +397,6 @@
     node.appendChild(Loadbtn);
     node2.id = "ConfigDiv";
 
-    sellingAmount.type = "number";
-    sellingAmount.style.fontSize = "12px";
-    sellingAmount.style.padding = "5px";
-    sellingAmount.style.marginLeft = "10px";
-    sellingAmount.style.height = "25px";
-    sellingAmount.style.borderRadius = "0px";
-    sellingAmount.style.textAlign = "right";
-    sellingAmount.setAttribute("id", "SellingAmount");
-    sellingAmount.min = 10;
-    sellingAmount.value = 10;
-    /* 
-    itemlist.style.fontSize = "13px";
-    itemlist.style.margin = "5px";
-
-    itemlistInput.style.fontSize = "13px";
-    itemlistInput.style.margin = "5px";
-    itemlistInput.style.height = "25px"; */
-
-    /*     addToListBtn.style.marginLeft = "10px";
-    addToListBtn.id = "AddBtn";
-    addToListBtn.textContent = "Add";
-    addToListBtn.onclick = addToList;
-
-    removeListBtn.style.marginLeft = "10px";
-    removeListBtn.id = "RemoveBtn";
-    removeListBtn.textContent = "Remove";
-    removeListBtn.onclick = removeFromList; */
-
     var x = document.createElement("STRONG");
     var t = document.createTextNode("Items:");
     x.appendChild(t);
@@ -537,21 +404,10 @@
     node2.append(x);
     node2.append(bothItemList);
 
-    /*  node2.appendChild(itemlist);
-    node2.appendChild(itemlistInput); */
-
-    //node2.append("Amount:");
-
-    /*     node2.appendChild(sellingAmount);
-    node2.appendChild(addToListBtn);
-    node2.appendChild(removeListBtn); */
-    /*     node2.appendChild(document.createElement("hr"));
-     */
     node2.setAttribute(
       "style",
       "position: fixed;z-index: 1000; left: 25%; width: 50%; height: 100%;background-color: #edededd6;visibility:hidden; padding: 10px"
     );
-    //node2.appendChild(text);
 
     node2.appendChild(document.createElement("hr"));
     node2.append("Turn on/off Lumber Mill :");
@@ -587,20 +443,15 @@
     node2.appendChild(StartSellingCheckBox);
     node2.appendChild(document.createElement("hr"));
 
-    node2.append("Clear console :");
-    node2.appendChild(ClearConsoleLogCheckBox);
-    node2.appendChild(document.createElement("hr"));
-
     node2.append("Collect Town Coin :");
     node2.appendChild(CollectTownCoinCheckBox);
     node2.appendChild(document.createElement("hr"));
 
     node2.appendChild(Savebtn);
-    node2.appendChild(ClearStorageDataBtn);
 
     node.appendChild(node2);
     node.setAttribute("style", "position:fixed;z-index:1000");
-    //text.value = JSON.stringify(craftedItem);
+
     document.getElementsByTagName("Body")[0].appendChild(node);
 
     var allItemsList = document.getElementById("allItemsList");
@@ -695,10 +546,6 @@
         collectTownCoinIfNeedet();
       }
 
-      if (ClearConsoleLogCheckBox.checked) {
-        console.clear();
-      }
-
       if (ConstructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
         var woodInNeed = 0;
         for (i = 0; i < ConstructionSiteArray.length; i++) {
@@ -735,12 +582,7 @@
                 if (isNaN(parsedWoodRecived)) {
                   parsedWoodRecived = 0;
                 }
-
-                //console.log(parsedWoodRequired);
-                //console.log(parsedWoodRecived);
-
                 woodInNeed += parsedWoodRequired - parsedWoodRecived;
-                //console.log(woodInNeed);
               }
             }
           }
@@ -845,16 +687,6 @@
       if (Game.town.GetStoredCrafts()["Gasoline"] > 0) {
         var itemtoSell;
         var nCountItem;
-        /* var craftedItem = JSON.parse(
-          document.getElementById("configTxt").value
-        );
-
-        for (var item in craftedItem) {
-          item.points = Game.craftData[item.name].CityPoints;
-          item.price = Game.craftData[item.name].CityPrice;
-        }
-
-        console.log(craftedItem); */
 
         var activeItemsList = document.getElementById("activeItemsList");
         var craftedItem = activeItemsList.getElementsByTagName("DIV");
