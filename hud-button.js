@@ -1,13 +1,12 @@
-var hud = document.querySelector("body > div:nth-child(29) > div > div.bottom");
-var helperButton = document.createElement("div");
-var buttonImage = document.createElement("img");
+const hud = document.querySelector("body > div:nth-child(29) > div > div.bottom");
+const helperButtonDiv = document.createElement("div");
+const buttonImage = document.createElement("img");
 
-helperButton.className = "right hud-helper-button";
-helperButton.style ="pointer-events: all; visibility: visible; bottom: 135px;";
+helperButtonDiv.style ="position: fixed; bottom: 5px; right: 15px;";
 
-buttonImage.src = "https://www.schmengler-se.de/wp-content/uploads/2016/09/helper.png";
-buttonImage.width = "58px";
-buttonImage.height = "58px";
-helperButton.appendChild(buttonImage);
-hud.appendChild(helperButton);
+buttonImage.src = "https://tutuapp-vip.com/wp-content/uploads/2021/06/panda-helper-app-200px-144x144.png";
+buttonImage.width = 100;
+buttonImage.height = 100;
 
+helperButtonDiv.appendChild(buttonImage);
+hud.appendChild(helperButtonDiv);
