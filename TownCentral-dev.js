@@ -216,57 +216,131 @@
   function attachConfigGui() {
     console.log("attachConfigGui");
 
+    const helperButtonDiv = document.createElement("DIV");
+    const buttonImage = document.createElement("IMG");
     const bothItemsList = document.createElement("DIV");
+    const bothBuildingsList = document.createElement("DIV");
+    const allBuildingsList = document.createElement("DIV");
+    const activeBuildingsList = document.createElement("DIV");
     const allItemsList = document.createElement("DIV");
     const activeItemsList = document.createElement("DIV");
     const configDiv = document.createElement("DIV");
 
+    helperButtonDiv.style = "position: fixed; bottom: 5px; right: 15px;";
+    buttonImage.src =
+      "https://user-images.githubusercontent.com/2233130/151796996-ae008a4b-ad0b-4109-96f1-f94983da2ea2.png";
+    buttonImage.onclick = toggleConfigVisible;
+    buttonImage.width = 100;
+    buttonImage.height = 100;
+
+    helperButtonDiv.appendChild(buttonImage);
+
     bothItemsList.setAttribute("style", "height:45%;");
+    bothBuildingsList.setAttribute("style", "height:45%;");
 
     allItemsList.setAttribute(
       "style",
-      "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
+      "width: 45%;float: left;height: 100%;position: relative;overflow-y: auto;border: 5px dotted green;margin-right: 4%;padding: 1%;"
     );
     allItemsList.id = "allItemsList";
 
-    for (var key in Game.craftData) {
-      const item = Game.craftData[key];
-      const option = document.createElement("DIV");
-      const itemInfo =
-        key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
-      option.innerText = key;
-      option.title = itemInfo;
-      option.setAttribute("data-key", key);
-      allItemsList.appendChild(option);
+    if (localStorage.getItem("allItemsList")) {
+      allItemsList.innerHTML = localStorage.getItem("allItemsList");
+    } else {
+      for (var key in Game.craftData) {
+        const item = Game.craftData[key];
+        const option = document.createElement("DIV");
+        const itemInfo =
+          key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
+        option.innerText = key;
+        option.title = itemInfo;
+        option.setAttribute("data-key", key);
+        allItemsList.appendChild(option);
+      }
     }
 
     activeItemsList.setAttribute(
       "style",
-      "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
+      "width: 45%;float: left;height: 100%;position: relative;overflow-y: auto;border: 5px dotted green;padding: 1%;"
     );
     activeItemsList.id = "activeItemsList";
 
+    if (localStorage.getItem("activeItemsList")) {
+      activeItemsList.innerHTML = localStorage.getItem("activeItemsList");
+    }
+
+    var x = document.createElement("STRONG");
+    var t = document.createTextNode("Autosell:");
+    x.appendChild(t);
+
+    bothItemsList.append(x);
     bothItemsList.append(allItemsList);
     bothItemsList.append(activeItemsList);
+
+    allBuildingsList.setAttribute(
+      "style",
+      "width: 45%;float: left;height: 100%;position: relative;overflow-y: auto;border: 5px dotted green;margin-right: 4%;padding: 1%;"
+    );
+    allBuildingsList.id = "allBuildingsList";
+
+    if (localStorage.getItem("allBuildingsList")) {
+      allBuildingsList.innerHTML = localStorage.getItem("allBuildingsList");
+    } else {
+      /* for (var key in Game.craftData) {
+        const item = Game.craftData[key];
+        const option = document.createElement("DIV");
+        const itemInfo =
+          key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
+        option.innerText = key;
+        option.title = itemInfo;
+        option.setAttribute("data-key", key);
+        allItemsList.appendChild(option);
+      } */
+    }
+
+    activeBuildingsList.setAttribute(
+      "style",
+      "width: 45%;float: left;height: 100%;position: relative;overflow-y: auto;border: 5px dotted green;padding: 1%;"
+    );
+    activeBuildingsList.id = "activeBuildingsList";
+
+    if (localStorage.getItem("activeBuildingsList")) {
+      activeBuildingsList.innerHTML = localStorage.getItem("activeBuildingsList");
+    }
+
+    var x = document.createElement("STRONG");
+    var t = document.createTextNode("Toggle Building:");
+    x.appendChild(t);
+
+    bothBuildingsList.append(x);
+    bothBuildingsList.append(allBuildingsList);
+    bothBuildingsList.append(activeBuildingsList);
 
     configDiv.id = "configDiv";
     configDiv.setAttribute(
       "style",
-      "position: fixed;z-index: 1000;width: 35%;height: 100%;background-color: #edededd6;visibility:hidden"
+      "position: fixed;z-index: 1000; left: 25%; top: 10%; width: 50%; height: 70%; background-color: rgb(163, 207, 65); opacity: 0.65; visibility:hidden; padding: 10px; color: green;"
     );
 
     configDiv.append(bothItemsList);
+    configDiv.append(bothBuildingsList);
 
     var sortAll = Sortable.create(allItemsList, {
       group: {
         name: "shared",
       },
+      onSort: (evt) => {
+        localStorage.setItem("allItemsList", allItemsList.innerHTML);
+      },
       animation: 150,
       sort: false, // To disable sorting: set sort to false
     });
-    
+
     var sortActive = Sortable.create(activeItemsList, {
       group: "shared",
+      onSort: (evt) => {
+        localStorage.setItem("activeItemsList", activeItemsList.innerHTML);
+      },
       onAdd: (evt) => {
         evt.item.onclick = function (clickEvent) {
           if (
@@ -302,9 +376,8 @@
     });
 
     document.getElementsByTagName("Body")[0].appendChild(configDiv);
+    document.getElementsByTagName("Body")[0].appendChild(helperButtonDiv);
 
-    alert(Sortable.serialize(activeItemsList));
-    
     //add event listener key s
     document
       .getElementById("application-canvas")
@@ -315,13 +388,13 @@
       });
   }
 
-  function toggleBuildingByType(type, stopValue, craft, woodCheck = false) {
+  function toggleBuildingByType(type, stopValue, craft, additionalCheck = true) {
     const buildingArray = Object.values(Game.town.objectDict).filter(
       (o) => o.type === type
     );
 
     if (buildingArray.length > 0) {
-      if (Game.town.GetStoredCrafts()[craft] >= stopValue) {
+      if (Game.town.GetStoredCrafts()[craft] >= stopValue && additionalCheck) {
         for (i = 0; i < buildingArray.length; i++) {
           if (
             buildingArray[i].logicObject.data.craft == craft &&
@@ -397,15 +470,21 @@
     }
   }
 
+  function getAllCrafter() {
+    const CrafterArray = Object.values(Game.town.objectDict).filter(
+      (o) => o.logicType === "Crafter"
+    );
+  }
+
   function freeStorage() {
     //ToDo: If storage is full check if you can sell something
-    var StorageArray = Object.values(Game.town.objectDict).filter(
+    const StorageArray = Object.values(Game.town.objectDict).filter(
       (o) => o.logicType === "Storage"
     );
   }
 
   function sell() {
-    var depotObjArray = Object.values(Game.town.objectDict).filter(
+    const depotObjArray = Object.values(Game.town.objectDict).filter(
       (o) => o.logicType === "Trade"
     );
 
