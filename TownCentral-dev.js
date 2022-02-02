@@ -5,7 +5,7 @@
 // @description  TownCentral DEV
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
-// @icon         https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://gala.games&size=16
+// @icon         https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://gala.games&size=32
 // @require      https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js
 // @grant        GM_setValue
 // @grant        GM_listValues
@@ -349,7 +349,7 @@
           ) {
             evt.item.setAttribute(
               "data-amount",
-              parseInt(evt.item.getAttribute("data-amount")) + 1
+              parseInt(evt.item.getAttribute("data-amount")) - 1
             );
           } else if (
             clickEvent.shiftKey &&
@@ -357,7 +357,7 @@
           ) {
             evt.item.setAttribute(
               "data-amount",
-              parseInt(evt.item.getAttribute("data-amount")) - 1
+              parseInt(evt.item.getAttribute("data-amount")) + 1
             );
           }
 
