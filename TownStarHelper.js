@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Town Star Helper DEV
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
@@ -67,12 +67,12 @@
           }
           if (
             document.querySelector(
-              "body > div:nth-child(27) > div > div > div > div > div.header-row > button"
+              "body > div:nth-child(24) > div > div > div > div > div.header-row > button"
             )
           ) {
             document
               .querySelector(
-                "body > div:nth-child(27) > div > div > div > div > div.header-row > button"
+                "body > div:nth-child(24) > div > div > div > div > div.header-row > button"
               )
               .click();
           }
@@ -219,7 +219,7 @@
 
     var bothItemList = document.createElement("DIV");
     var allItemsList = document.createElement("DIV");
-    var activeItemList = document.createElement("DIV");
+    var activeItemsList = document.createElement("DIV");
 
     bothItemList.setAttribute("style", "height:45%;");
 
@@ -229,6 +229,9 @@
     );
     allItemsList.id = "allItemsList";
 
+    if (localStorage.getItem("allItemsList")) {
+      allItemsList.innerHTML = localStorage.getItem("allItemsList");
+    } else {
     for (var key in Game.craftData) {
       const item = Game.craftData[key];
       var option = document.createElement("DIV");
@@ -237,16 +240,20 @@
       option.title = itemInfo;
       option.setAttribute("data-key", key);
       allItemsList.appendChild(option);
-    }
+    }}
 
-    activeItemList.setAttribute(
+    activeItemsList.setAttribute(
       "style",
       "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
     );
-    activeItemList.id = "activeItemsList";
+    activeItemsList.id = "activeItemsList";
+
+    if (localStorage.getItem("activeItemsList")) {
+      activeItemsList.innerHTML = localStorage.getItem("activeItemsList");
+    }
 
     bothItemList.append(allItemsList);
-    bothItemList.append(activeItemList);
+    bothItemList.append(activeItemsList);
 
     var node = document.createElement("DIV");
     var Loadbtn = document.createElement("BUTTON");
@@ -454,18 +461,24 @@
 
     document.getElementsByTagName("Body")[0].appendChild(node);
 
-    var allItemsList = document.getElementById("allItemsList");
-    var activeItemsList = document.getElementById("activeItemsList");
+    allItemsList = document.getElementById("allItemsList");
+    activeItemsList = document.getElementById("activeItemsList");
 
     var sortAll = Sortable.create(allItemsList, {
       group: {
         name: "shared",
+      },
+      onSort: (evt) => {
+        localStorage.setItem("allItemsList", allItemsList.innerHTML);
       },
       animation: 150,
       sort: false, // To disable sorting: set sort to false
     });
     var sortActive = Sortable.create(activeItemsList, {
       group: "shared",
+      onSort: (evt) => {
+        localStorage.setItem("activeItemsList", activeItemsList.innerHTML);
+      },
       onAdd: (evt) => {
         evt.item.onclick = function (clickEvent) {
           if (
