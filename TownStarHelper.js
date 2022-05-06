@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Town Star Helper DEV
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
@@ -534,7 +534,7 @@
         (o) => o.type === "Water_Facility"
       );
       var powerPlantArray = Object.values(Game.town.objectDict).filter(
-        (o) => o.type === "Power_Plant"
+        (o) => o.type === "Power_Plant" || o.type === "Nuclear_Power"
       );
       var lumberMillArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Lumber_Mill"
@@ -546,7 +546,6 @@
       var StorageArray = Object.values(Game.town.objectDict).filter(
         (o) => o.logicType === "Storage"
       );
-      console.log(StorageArray);
 
       var isConstructionNeedWood = false;
       var depotObj = "";
