@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Town Star Helper DEV
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
@@ -16,7 +16,7 @@
 (function () {
   "use strict";
 
-  const sellTimer = 20; // Seconds between selling
+  const sellTimer = 10; // Seconds between selling
   var trackedItems = [];
   let sellingActive = 0;
   let trackingActive = 0;
@@ -785,7 +785,7 @@
                     .getElementsByClassName("sell-button")[0]
                     .click();
                 }, 700);
-              }, 1500);
+              }, 700);
             }
           }
         }
