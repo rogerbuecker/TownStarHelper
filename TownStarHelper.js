@@ -96,8 +96,12 @@
     );
 
     if (constructionSitesPavedRoad.length <= 0 && roads.length > 0) {
-      let randomIndex = Math.floor(Math.random() * (roads.length + 1));
-      Game.town.RemoveObject(roads[randomIndex].townX, roads[randomIndex].townZ, !1);
+      let randomIndex = Math.floor(Math.random() * roads.length);
+      Game.town.RemoveObject(
+        roads[randomIndex].townX,
+        roads[randomIndex].townZ,
+        !1
+      );
       Game.town.AddObject(
         "Construction_Site",
         roads[randomIndex].townX,
@@ -113,7 +117,7 @@
           Game.objectData["Dirt_Road"].DestroyCost,
       });
     } else {
-      alert('busy...');
+      alert("busy...");
     }
   }
 
@@ -128,8 +132,12 @@
     );
 
     if (constructionSitesLogger.length <= 0 && lumberjacks.length > 0) {
-      let randomIndex = Math.floor(Math.random() * (lumberjacks.length + 1));
-      Game.town.RemoveObject(lumberjacks[randomIndex].townX, lumberjacks[randomIndex].townZ, !1);
+      let randomIndex = Math.floor(Math.random() * lumberjacks.length);
+      Game.town.RemoveObject(
+        lumberjacks[randomIndex].townX,
+        lumberjacks[randomIndex].townZ,
+        !1
+      );
       Game.town.AddObject(
         "Construction_Site",
         lumberjacks[randomIndex].townX,
@@ -145,7 +153,7 @@
           Game.objectData["Lumberjack_House"].DestroyCost,
       });
     } else {
-      alert('busy...');
+      alert("busy...");
     }
   }
 
@@ -731,13 +739,17 @@
                   parsedWoodRecived = 0;
                 }
                 woodInNeed += parsedWoodRequired - parsedWoodRecived;
+
               }
             }
           }
-          if (
-            woodInNeed + parseInt(WoodStop.value) >=
-            Game.town.GetStoredCrafts()["Wood"]
-          ) {
+
+          let woodAmount = Game.town.GetStoredCrafts()["Wood"];
+          if (isNaN(woodAmount)) {
+            woodAmount = 0;
+          }
+
+          if (woodInNeed + parseInt(WoodStop.value) > woodAmount) {
             isConstructionNeedWood = true;
           }
         }
@@ -830,12 +842,12 @@
             if (
               lumberMillArray[i].logicObject.data.craft == "Lumber" &&
               lumberMillArray[i].logicObject.data.state != "Produce" &&
-              lumberMillArray[i].logicObject.data.reqList.Wood > 3
+              lumberMillArray[i].logicObject.data.reqList.Wood > 4
             ) {
-                if (localStorage.getItem("debug")) {
-                  console.log("Turning off Lumber Mill");
-                }
-                lumberMillArray[i].logicObject.SetCraft("None");
+              if (localStorage.getItem("debug")) {
+                console.log("Turning off Lumber Mill");
+              }
+              lumberMillArray[i].logicObject.SetCraft("None");
             }
           }
         } else {
