@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.7
 // @description  Town Star Helper DEV
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
@@ -16,12 +16,12 @@
 (function () {
   "use strict";
 
-  const sellTimer = 20; // Seconds between selling
+  const sellTimer = 10; // Seconds between selling
   var trackedItems = [];
   let sellingActive = 0;
   let trackingActive = 0;
 
-  new MutationObserver(function (mutations) {
+  new MutationObserver(function (_mutations) {
     let airdropcollected = 0;
     if (
       document.getElementsByClassName("hud-jimmy-button")[0] &&
@@ -56,6 +56,8 @@
     }
 
     if (typeof Game != "undefined" && Game.town != null) {
+      localStorage.setItem("debug", false);
+
       if (trackingActive == 0) {
         trackingActive = 1;
         LoadProductionMonitor();
@@ -67,12 +69,12 @@
           }
           if (
             document.querySelector(
-              "body > div:nth-child(27) > div > div > div > div > div.header-row > button"
+              "body > div:nth-child(24) > div > div > div > div > div.header-row > button"
             )
           ) {
             document
               .querySelector(
-                "body > div:nth-child(27) > div > div > div > div > div.header-row > button"
+                "body > div:nth-child(24) > div > div > div > div > div.header-row > button"
               )
               .click();
           }
@@ -83,6 +85,77 @@
       }
     }
   }).observe(document, { attributes: true, childList: true, subtree: true });
+
+  function updateStreet() {
+    var constructionSitesPavedRoad = Object.values(Game.town.objectDict).filter(
+      (o) => o.type === "Construction_Site" && o.data.type === "Paved_Road"
+    );
+
+    var roads = Object.values(Game.town.objectDict).filter(
+      (o) => o.type === "Dirt_Road"
+    );
+
+    if (constructionSitesPavedRoad.length <= 0 && roads.length > 0) {
+      let randomIndex = Math.floor(Math.random() * roads.length);
+      Game.town.RemoveObject(
+        roads[randomIndex].townX,
+        roads[randomIndex].townZ,
+        !1
+      );
+      Game.town.AddObject(
+        "Construction_Site",
+        roads[randomIndex].townX,
+        roads[randomIndex].townZ,
+        0,
+        {
+          type: "Paved_Road",
+        }
+      );
+      LEDGER.buyObject(roads[0].townX, roads[0].townZ, "Paved_Road", {
+        currency:
+          Game.objectData["Paved_Road"].BuildCost -
+          Game.objectData["Dirt_Road"].DestroyCost,
+      });
+    } else {
+      alert("busy...");
+    }
+  }
+
+  function updateLumberjack() {
+    var constructionSitesLogger = Object.values(Game.town.objectDict).filter(
+      (o) =>
+        o.type === "Construction_Site" && o.data.type === "The_Logger_House"
+    );
+
+    var lumberjacks = Object.values(Game.town.objectDict).filter(
+      (o) => o.type === "Lumberjack_House"
+    );
+
+    if (constructionSitesLogger.length <= 0 && lumberjacks.length > 0) {
+      let randomIndex = Math.floor(Math.random() * lumberjacks.length);
+      Game.town.RemoveObject(
+        lumberjacks[randomIndex].townX,
+        lumberjacks[randomIndex].townZ,
+        !1
+      );
+      Game.town.AddObject(
+        "Construction_Site",
+        lumberjacks[randomIndex].townX,
+        lumberjacks[randomIndex].townZ,
+        0,
+        {
+          type: "The_Logger_House",
+        }
+      );
+      LEDGER.buyObject(roads[0].townX, roads[0].townZ, "The_Logger_House", {
+        currency:
+          Game.objectData["The_Logger_House"].BuildCost -
+          Game.objectData["Lumberjack_House"].DestroyCost,
+      });
+    } else {
+      alert("busy...");
+    }
+  }
 
   function LoadConfig() {
     document.getElementById("ConfigDiv").style.visibility = "visible";
@@ -114,6 +187,10 @@
       document.getElementById("RefineryCheckBox").checked
     );
     localStorage.setItem(
+      "PowerPlant",
+      document.getElementById("PowerPlantCheckBox").checked
+    );
+    localStorage.setItem(
       "LaborCost",
       Number(document.getElementById("LaborCost").value)
     );
@@ -124,6 +201,10 @@
     localStorage.setItem(
       "EnergyStop",
       Number(document.getElementById("EnergyStop").value)
+    );
+    localStorage.setItem(
+      "GasolineStop",
+      Number(document.getElementById("GasolineStop").value)
     );
     localStorage.setItem(
       "WaterStop",
@@ -140,15 +221,24 @@
   }
 
   async function collectTownCoinIfNeedet() {
-    if (!Game.challenge.claimed) {
-      console.log("collect Town Coin");
-      let collectEarningsResponse = await Game.collectEarnings();
-      console.log(collectEarningsResponse.message);
+    let challenge = await Game.challenge;
+    if (challenge) {
+      if (!challenge.claimed) {
+        if (localStorage.getItem("debug")) {
+          console.log("collect Town Coin");
+        }
+        let collectEarningsResponse = await Game.collectEarnings();
+        if (localStorage.getItem("debug")) {
+          console.log(collectEarningsResponse.message);
+        }
+      }
     }
   }
 
   function LoadProductionMonitor() {
-    console.log("LoadProductionMonitor");
+    if (localStorage.getItem("debug")) {
+      console.log("LoadProductionMonitor");
+    }
     class TrackUnitDeliverOutputTask extends UnitDeliverOutputTask {
       onArrive() {
         super.onArrive();
@@ -209,9 +299,11 @@
     var sLumberMill = localStorage.getItem("LumberMill");
     var sWaterFacility = localStorage.getItem("WaterFacility");
     var sRefinery = localStorage.getItem("Refinery");
+    var sPowerPlant = localStorage.getItem("PowerPlant");
     var sLaborCost = localStorage.getItem("LaborCost");
     var sWoodStop = localStorage.getItem("WoodStop");
     var sEnergyStop = localStorage.getItem("EnergyStop");
+    var sGasolineStop = localStorage.getItem("GasolineStop");
     var sWaterStop = localStorage.getItem("WaterStop");
     var sAutoComplete = localStorage.getItem("AutoComplete");
     var sStartSelling = localStorage.getItem("StartSelling");
@@ -219,7 +311,7 @@
 
     var bothItemList = document.createElement("DIV");
     var allItemsList = document.createElement("DIV");
-    var activeItemList = document.createElement("DIV");
+    var activeItemsList = document.createElement("DIV");
 
     bothItemList.setAttribute("style", "height:45%;");
 
@@ -229,36 +321,51 @@
     );
     allItemsList.id = "allItemsList";
 
-    for (var key in Game.craftData) {
-      const item = Game.craftData[key];
-      var option = document.createElement("DIV");
-      var itemInfo = key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
-      option.innerText = key;
-      option.title = itemInfo;
-      option.setAttribute("data-key", key);
-      allItemsList.appendChild(option);
+    if (localStorage.getItem("allItemsList")) {
+      allItemsList.innerHTML = localStorage.getItem("allItemsList");
+    } else {
+      for (var key in Game.craftData) {
+        const item = Game.craftData[key];
+        var option = document.createElement("DIV");
+        var itemInfo =
+          key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
+        option.innerText = key;
+        option.title = itemInfo;
+        option.setAttribute("data-key", key);
+        allItemsList.appendChild(option);
+      }
     }
 
-    activeItemList.setAttribute(
+    activeItemsList.setAttribute(
       "style",
       "width: 50%;float: left;height: 100%;position: relative;overflow-y: auto;"
     );
-    activeItemList.id = "activeItemsList";
+    activeItemsList.id = "activeItemsList";
+
+    if (localStorage.getItem("activeItemsList")) {
+      activeItemsList.innerHTML = localStorage.getItem("activeItemsList");
+    }
 
     bothItemList.append(allItemsList);
-    bothItemList.append(activeItemList);
+    bothItemList.append(activeItemsList);
 
     var node = document.createElement("DIV");
     var Loadbtn = document.createElement("BUTTON");
+
+    var Streetbtn = document.createElement("BUTTON");
+    var Lumberbtn = document.createElement("BUTTON");
+
     var node2 = document.createElement("DIV");
     var Savebtn = document.createElement("BUTTON");
     var lumberMillCheckBox = document.createElement("Input");
     var waterFacilityCheckBox = document.createElement("Input");
     var RefineryCheckBox = document.createElement("Input");
+    var PowerPlantCheckBox = document.createElement("Input");
     var AutoCompleteCheckBox = document.createElement("Input");
     var LaborCost = document.createElement("Input");
     var WoodStop = document.createElement("Input");
     var EnergyStop = document.createElement("Input");
+    var GasolineStop = document.createElement("Input");
     var WaterStop = document.createElement("Input");
     var CollectTownCoinCheckBox = document.createElement("Input");
 
@@ -266,6 +373,12 @@
     Loadbtn.setAttribute("id", "configBtn");
     Loadbtn.textContent = "Open";
     Loadbtn.onclick = LoadConfig;
+
+    Streetbtn.textContent = "Street";
+    Streetbtn.onclick = updateStreet;
+
+    Lumberbtn.textContent = "Lumber";
+    Lumberbtn.onclick = updateLumberjack;
 
     Savebtn.setAttribute("id", "Savebtn");
     Savebtn.textContent = "Close config";
@@ -290,6 +403,17 @@
         waterFacilityCheckBox.checked = false;
       } else {
         waterFacilityCheckBox.checked = true;
+      }
+    }
+
+    PowerPlantCheckBox.type = "checkbox";
+    PowerPlantCheckBox.style.height = "12px";
+    PowerPlantCheckBox.setAttribute("id", "PowerPlantCheckBox");
+    if (sPowerPlant != null) {
+      if (sPowerPlant == "false") {
+        PowerPlantCheckBox.checked = false;
+      } else {
+        PowerPlantCheckBox.checked = true;
       }
     }
 
@@ -355,6 +479,20 @@
     EnergyStop.value = 8;
     if (sEnergyStop != null) {
       EnergyStop.value = Number(sEnergyStop);
+    }
+
+    GasolineStop.type = "number";
+    GasolineStop.style.height = "10px";
+    GasolineStop.style.width = "50px";
+    GasolineStop.style.fontSize = "12px";
+    GasolineStop.style.padding = "4px";
+    GasolineStop.style.marginLeft = "5px";
+    GasolineStop.style.borderRadius = "0px";
+    GasolineStop.style.textAlign = "right";
+    GasolineStop.setAttribute("id", "GasolineStop");
+    GasolineStop.value = 8;
+    if (sGasolineStop != null) {
+      GasolineStop.value = Number(sGasolineStop);
     }
 
     WaterStop.type = "number";
@@ -424,11 +562,18 @@
     node2.appendChild(WaterStop);
 
     node2.appendChild(document.createElement("hr"));
-    node2.append("Turn on/off Refinery :");
-    node2.appendChild(RefineryCheckBox);
+    node2.append("Turn on/off PowerPlant :");
+    node2.appendChild(PowerPlantCheckBox);
     node2.appendChild(document.createElement("br"));
     node2.append("Energy to stop :");
     node2.appendChild(EnergyStop);
+
+    node2.appendChild(document.createElement("hr"));
+    node2.append("Switch Refinery to Jet Fuel:");
+    node2.appendChild(RefineryCheckBox);
+    node2.appendChild(document.createElement("br"));
+    node2.append("Gasoline to switch :");
+    node2.appendChild(GasolineStop);
 
     node2.appendChild(document.createElement("hr"));
     node2.append("Auto Complete Construction Site :");
@@ -447,6 +592,8 @@
     node2.appendChild(CollectTownCoinCheckBox);
     node2.appendChild(document.createElement("hr"));
 
+    node2.appendChild(Lumberbtn);
+    node2.appendChild(Streetbtn);
     node2.appendChild(Savebtn);
 
     node.appendChild(node2);
@@ -454,18 +601,24 @@
 
     document.getElementsByTagName("Body")[0].appendChild(node);
 
-    var allItemsList = document.getElementById("allItemsList");
-    var activeItemsList = document.getElementById("activeItemsList");
+    allItemsList = document.getElementById("allItemsList");
+    activeItemsList = document.getElementById("activeItemsList");
 
     var sortAll = Sortable.create(allItemsList, {
       group: {
         name: "shared",
+      },
+      onSort: (evt) => {
+        localStorage.setItem("allItemsList", allItemsList.innerHTML);
       },
       animation: 150,
       sort: false, // To disable sorting: set sort to false
     });
     var sortActive = Sortable.create(activeItemsList, {
       group: "shared",
+      onSort: (evt) => {
+        localStorage.setItem("activeItemsList", activeItemsList.innerHTML);
+      },
       onAdd: (evt) => {
         evt.item.onclick = function (clickEvent) {
           if (
@@ -521,19 +674,22 @@
         (o) => o.type === "Water_Facility"
       );
       var powerPlantArray = Object.values(Game.town.objectDict).filter(
-        (o) => o.type === "Power_Plant"
+        (o) => o.type === "Power_Plant" || o.type === "Nuclear_Power"
       );
       var lumberMillArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Lumber_Mill"
       );
-      var ConstructionSiteArray = Object.values(Game.town.objectDict).filter(
+      var constructionSiteArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Construction_Site"
       );
       //ToDo: If storage is full check if you can sell something
-      var StorageArray = Object.values(Game.town.objectDict).filter(
+      var storageArray = Object.values(Game.town.objectDict).filter(
         (o) => o.logicType === "Storage"
       );
-      console.log(StorageArray);
+
+      var refineryArray = Object.values(Game.town.objectDict).filter(
+        (o) => o.type === "Refinery"
+      );
 
       var isConstructionNeedWood = false;
       var depotObj = "";
@@ -546,34 +702,34 @@
         collectTownCoinIfNeedet();
       }
 
-      if (ConstructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
+      if (constructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
         var woodInNeed = 0;
-        for (i = 0; i < ConstructionSiteArray.length; i++) {
-          if (ConstructionSiteArray[i].logicObject.data.state == "Complete") {
+        for (i = 0; i < constructionSiteArray.length; i++) {
+          if (constructionSiteArray[i].logicObject.data.state == "Complete") {
             if (
-              Game.objectData[ConstructionSiteArray[i].logicObject.data.type]
+              Game.objectData[constructionSiteArray[i].logicObject.data.type]
                 .LaborCost <= LaborCost.value
             ) {
-              ConstructionSiteArray[i].logicObject.OnTapped();
+              constructionSiteArray[i].logicObject.OnTapped();
             }
           } else {
             if (
-              ConstructionSiteArray[i].logicObject.constructionData.reqs.Wood !=
+              constructionSiteArray[i].logicObject.constructionData.reqs.Wood !=
               undefined
             ) {
               if (
-                ConstructionSiteArray[i].logicObject.data.receivedCrafts.Wood ==
+                constructionSiteArray[i].logicObject.data.receivedCrafts.Wood ==
                   undefined ||
-                ConstructionSiteArray[i].logicObject.data.receivedCrafts.Wood <
-                  ConstructionSiteArray[i].logicObject.constructionData.reqs
+                constructionSiteArray[i].logicObject.data.receivedCrafts.Wood <
+                  constructionSiteArray[i].logicObject.constructionData.reqs
                     .Wood
               ) {
                 var parsedWoodRequired = parseInt(
-                  ConstructionSiteArray[i].logicObject.constructionData.reqs
+                  constructionSiteArray[i].logicObject.constructionData.reqs
                     .Wood
                 );
                 var parsedWoodRecived = parseInt(
-                  ConstructionSiteArray[i].logicObject.data.receivedCrafts.Wood
+                  constructionSiteArray[i].logicObject.data.receivedCrafts.Wood
                 );
 
                 if (isNaN(parsedWoodRequired)) {
@@ -583,13 +739,17 @@
                   parsedWoodRecived = 0;
                 }
                 woodInNeed += parsedWoodRequired - parsedWoodRecived;
+
               }
             }
           }
-          if (
-            woodInNeed + parseInt(WoodStop.value) >=
-            Game.town.GetStoredCrafts()["Wood"]
-          ) {
+
+          let woodAmount = Game.town.GetStoredCrafts()["Wood"];
+          if (isNaN(woodAmount)) {
+            woodAmount = 0;
+          }
+
+          if (woodInNeed + parseInt(WoodStop.value) > woodAmount) {
             isConstructionNeedWood = true;
           }
         }
@@ -598,63 +758,107 @@
       if (waterFacilityArray.length > 0 && waterFacilityCheckBox.checked) {
         if (Game.town.GetStoredCrafts()["Water_Drum"] >= WaterStop.value) {
           for (i = 0; i < waterFacilityArray.length; i++) {
-            if (waterFacilityArray[i].logicObject.data.craft == "Water_Drum") {
+            if (
+              waterFacilityArray[i].logicObject.data.craft == "Water_Drum" &&
+              waterFacilityArray[i].logicObject.data.state != "Produce"
+            ) {
+              if (localStorage.getItem("debug")) {
+                console.log("Turning off Water Facility");
+              }
               waterFacilityArray[i].logicObject.SetCraft("None");
             }
           }
-          console.log("Turning off Water Facility");
         } else {
           for (i = 0; i < waterFacilityArray.length; i++) {
             if (waterFacilityArray[i].logicObject.data.craft == "None") {
+              if (localStorage.getItem("debug")) {
+                console.log("Turning on Water Facility");
+              }
               waterFacilityArray[i].logicObject.SetCraft("Water_Drum");
             }
           }
-          console.log("Turning on Water Facility");
         }
       }
 
-      if (powerPlantArray.length > 0 && RefineryCheckBox.checked) {
+      if (powerPlantArray.length > 0 && PowerPlantCheckBox.checked) {
         if (Game.town.GetStoredCrafts()["Energy"] >= EnergyStop.value) {
           for (i = 0; i < powerPlantArray.length; i++) {
-            if (powerPlantArray[i].logicObject.data.craft == "Energy") {
+            if (
+              powerPlantArray[i].logicObject.data.craft == "Energy" &&
+              powerPlantArray[i].logicObject.data.state != "Produce"
+            ) {
+              if (localStorage.getItem("debug")) {
+                console.log("Turning off Power Plant");
+              }
               powerPlantArray[i].logicObject.SetCraft("None");
             }
           }
-          console.log("Turning off Power Plant");
         } else {
           for (i = 0; i < powerPlantArray.length; i++) {
             if (powerPlantArray[i].logicObject.data.craft == "None") {
+              if (localStorage.getItem("debug")) {
+                console.log("Turning on Power Plant");
+              }
               powerPlantArray[i].logicObject.SetCraft("Energy");
             }
           }
-          console.log("Turning on Power Plant");
+        }
+      }
+
+      if (refineryArray.length > 0 && RefineryCheckBox.checked) {
+        if (Game.town.GetStoredCrafts()["Gasoline"] >= GasolineStop.value) {
+          for (i = 0; i < refineryArray.length; i++) {
+            if (
+              refineryArray[i].logicObject.data.craft == "Gasoline" &&
+              refineryArray[i].logicObject.data.state != "Produce"
+            ) {
+              if (localStorage.getItem("debug")) {
+                console.log("Switch Refinery to Jet Fuel");
+              }
+              refineryArray[i].logicObject.SetCraft("Jet_Fuel");
+            }
+          }
+        } else {
+          for (i = 0; i < refineryArray.length; i++) {
+            if (
+              refineryArray[i].logicObject.data.craft == "Jet_Fuel" &&
+              refineryArray[i].logicObject.data.state != "Produce"
+            ) {
+              if (localStorage.getItem("debug")) {
+                console.log("Switch Refinery to Gasolin");
+              }
+              refineryArray[i].logicObject.SetCraft("Gasoline");
+            }
+          }
         }
       }
 
       if (lumberMillArray.length > 0 && lumberMillCheckBox.checked) {
         if (
           Game.town.GetStoredCrafts()["Wood"] <= WoodStop.value ||
-          Game.town.GetStoredCrafts()["Wood"] == undefined ||
           isConstructionNeedWood
         ) {
           for (i = 0; i < lumberMillArray.length; i++) {
             if (
               lumberMillArray[i].logicObject.data.craft == "Lumber" &&
-              lumberMillArray[i].logicObject.data.state != "Produce"
+              lumberMillArray[i].logicObject.data.state != "Produce" &&
+              lumberMillArray[i].logicObject.data.reqList.Wood > 4
             ) {
-              if (lumberMillArray[i].logicObject.data.reqList.Wood > 3) {
-                lumberMillArray[i].logicObject.SetCraft("None");
+              if (localStorage.getItem("debug")) {
+                console.log("Turning off Lumber Mill");
               }
+              lumberMillArray[i].logicObject.SetCraft("None");
             }
           }
-          console.log("Turning off Lumber Mill");
         } else {
           for (i = 0; i < lumberMillArray.length; i++) {
             if (lumberMillArray[i].logicObject.data.craft == "None") {
+              if (localStorage.getItem("debug")) {
+                console.log("Turning on Lumber Mill");
+              }
               lumberMillArray[i].logicObject.SetCraft("Lumber");
             }
           }
-          console.log("Turning on Lumber Mill");
         }
       }
 
@@ -672,14 +876,20 @@
             startTime.getTime() + Game.town.tradesList[j].duration
           );
           var currentTime = new Date();
-          console.log("Depot Busy -- " + busyDepotKey);
+          if (localStorage.getItem("debug")) {
+            console.log("Depot Busy -- " + busyDepotKey);
+          }
           if (currentTime.getTime() - endTime.getTime() > 1000) {
             busyDepot.push(busyDepotKey);
-            console.log("Depot Busy -- " + busyDepotKey);
+            if (localStorage.getItem("debug")) {
+              console.log("Depot Busy -- " + busyDepotKey);
+            }
             Game.town.objectDict[busyDepotKey].logicObject.OnTapped();
           } else {
             busyDepot.push(busyDepotKey);
-            console.log("Depot Busy -- " + busyDepotKey);
+            if (localStorage.getItem("debug")) {
+              console.log("Depot Busy -- " + busyDepotKey);
+            }
           }
         }
       }
@@ -702,9 +912,9 @@
         }
         if (Game.town.GetStoredCrafts()[itemtoSell] >= nCountItem) {
           if (nCountItem >= 100) {
-            for (var k = 0; k < depotObjArray.length; k++) {
-              if (depotObjArray[k].type == "Freight_Pier") {
-                depotObj = depotObjArray[k];
+            for (const element of depotObjArray) {
+              if (element.type == "Freight_Pier") {
+                depotObj = element;
                 depotKey =
                   "[" + depotObj.townX + ", " + "0, " + depotObj.townZ + "]";
                 if (Game.town.tradesList.length > 0) {
@@ -728,9 +938,9 @@
               }
             }
           } else {
-            for (var l = 0; l < depotObjArray.length; l++) {
-              if (depotObjArray[l].type != "Freight_Pier") {
-                depotObj = depotObjArray[l];
+            for (const element of depotObjArray) {
+              if (element.type != "Freight_Pier") {
+                depotObj = element;
                 depotKey =
                   "[" + depotObj.townX + ", " + "0, " + depotObj.townZ + "]";
                 if (Game.town.tradesList.length > 0) {
@@ -773,7 +983,7 @@
                     .getElementsByClassName("sell-button")[0]
                     .click();
                 }, 700);
-              }, 1500);
+              }, 700);
             }
           }
         }
