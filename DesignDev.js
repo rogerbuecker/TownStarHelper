@@ -19,7 +19,7 @@
 
   let configOpen = false;
 
-  attachConfigGui();
+  attachConfigGui2();
 
   function toggleConfigVisible() {
     let configDiv = document.getElementById("configDiv");
@@ -29,6 +29,7 @@
       configDiv.style.visibility = "hidden";
       configOpen = false;
     } else {
+      document.getElementById("main").click();
       configDiv.style.visibility = "visible";
       configDiv.style.display = "block";
       closeAllScreens();
@@ -40,6 +41,59 @@
     for (const element of document.getElementsByClassName("close-button")) {
       element.click();
     }
+  }
+
+  function openSettings(evt, cityName) {
+    let i, tabcontent, tablinks;
+
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  function attachConfigGui2() {
+    const configDiv = document.createElement("DIV");
+    configDiv.id = "configDiv";
+    configDiv.style = "position: fixed; z-index: 1000; left: 25%; top: 10%; width: 50%; height: 70%; background-color: rgb(163, 207, 65); opacity: 0.65; padding: 10px; color: green;";
+
+    configDiv.innerHTML = '<div class="tab">' +
+      '<button class="tablinks" onclick='openSettings('city1')'">City 1</button>' +
+      '<button class="tablinks" onclick="openSettings(event, \'city2\')">City 2</button>' +
+      '<button class="tablinks" onclick="openSettings(event, \'city3\')">City 3</button>' +
+      '</div>' + 
+      '<div id="city1" class="tabcontent">' +
+      '<h3>City 1</h3>' +
+      '<p>Some text..</p>' +
+      '</div>' +
+      '<div id="city2" class="tabcontent">' +
+      '<h3>City 2</h3>' +
+      '<p>Some text..</p>' +
+      '</div>' +
+      '<div id="city3" class="tabcontent">' +
+      '<h3>City 3</h3>' +
+      '<p>Some text..</p>' +
+      '</div>';
+
+      document.getElementsByTagName("Body")[0].appendChild(configDiv);
+      document.getElementsByTagName("Body")[0].appendChild(helperButtonDiv);
+  
+      //add event listener key s
+      document
+        .getElementById("application-canvas")
+        .addEventListener("keydown", function (event) {
+          if (event.key === "s") {
+            toggleConfigVisible();
+          }
+        });
   }
 
   function attachConfigGui() {
