@@ -7,6 +7,8 @@
 // @grant           GM_addStyle
 // ==/UserScript==
 
+GM_addStyle(".ConfigDiv { position: fixed; z-index: 1000; left: 25%; width: 50%; height: 100%; background-color: rgba(237, 237, 237, 0.84); visibility: visible; padding: 10px; }");
+
 $("body").append(`
     <div id="toggleConfigButton" style="position: fixed; bottom: 5px; right: 15px;">
         <img src="https://user-images.githubusercontent.com/2233130/151796996-ae008a4b-ad0b-4109-96f1-f94983da2ea2.png" />
