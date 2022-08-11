@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.9.2
-// @description  Town Star Helper fix close popup
+// @version      0.9.3
+// @description  Town Star Helper fix update
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
 // @grant        GM_setValue
@@ -17,7 +17,7 @@
   "use strict";
 
   const sellTimer = 10; // Seconds between selling
-  var trackedItems = [];
+  let trackedItems = [];
   let sellingActive = 0;
   let trackingActive = 0;
   let updateActive = 0;
@@ -113,49 +113,46 @@
         (o) => o.type === "Construction_Site"
       ).length < 1
     ) {
-      var currentConstructionSites = Object.values(Game.town.objectDict).filter(
+      let currentConstructionSites = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Construction_Site" && o.data.type === toType
       );
 
-      var update = Object.values(Game.town.objectDict).filter(
+      let currentUpdate = Object.values(Game.town.objectDict).filter(
         (o) => o.type === fromType
       );
 
-      if (currentConstructionSites.length <= 0 && update.length > 0) {
-        let randomIndex = Math.floor(Math.random() * update.length);
+      if (currentConstructionSites.length <= 0 && currentUpdate.length > 0) {
+        let randomIndex = Math.floor(Math.random() * currentUpdate.length);
         let upgradeCost =
           Game.objectData[toType].BuildCost -
           Game.objectData[fromType].DestroyCost;
         if (localStorage.getItem("debug") === 'true') {
           console.log("Update from " + fromType + " to " + toType);
           console.log("Cost" + upgradeCost);
-          console.log("X" + update[randomIndex].townX);
-          console.log("Y" + update[randomIndex].townZ);
+          console.log("X" + currentUpdate[randomIndex].townX);
+          console.log("Y" + currentUpdate[randomIndex].townZ);
         }
 
-        Game.addCurrency(-1 * upgradeCost);
-        LEDGER.buyObject(
-          update[randomIndex].townX,
-          update[randomIndex].townZ,
-          toType,
-          { currency: upgradeCost }
-        );
-        Game.town.removeObject(
-          update[randomIndex].townX,
-          update[randomIndex].townZ,
-          !1,
-          !0
-        );
-        Game.town.addObject(
-          "Construction_Site",
-          update[randomIndex].townX,
-          update[randomIndex].townZ,
-          0,
-          {
-            type: toType,
-          },
-          !0
-        );
+        LEDGER.buyObject(currentUpdate[randomIndex].townX, currentUpdate[randomIndex].townZ, toType, {
+          currency: upgradeCost,
+        }).then(() => {
+          Game.town.removeObject({
+            x: currentUpdate[randomIndex].townX,
+            z: currentUpdate[randomIndex].townZ,
+            currencyChange: -upgradeCost,
+            withVFX: !1,
+          }),
+            Game.town.addObject({
+              type: ObjectStateConstants.CONSTRUCTION,
+              x: currentUpdate[randomIndex].townX,
+              z: currentUpdate[randomIndex].townZ,
+              rotation: 0,
+              data: {
+                type: toType,
+              },
+              upgrade: !0,
+            });
+        });
 
         updateActive = Date.now();
       }
@@ -167,12 +164,8 @@
     document.getElementById("configBtn").style.display = "none";
 
     //To close all fullscreens
-    for (
-      var i = 0;
-      i < document.getElementsByClassName("close-button").length;
-      i++
-    ) {
-      document.getElementsByClassName("close-button")[i].click();
+    for (const element of document.getElementsByClassName("close-button")) {
+      element.click();
     }
   }
 
@@ -305,23 +298,23 @@
   }
 
   function activateSelling() {
-    var sNightUpdate = localStorage.getItem("NightUpdate");
-    var sLumberMill = localStorage.getItem("LumberMill");
-    var sWaterFacility = localStorage.getItem("WaterFacility");
-    var sRefinery = localStorage.getItem("Refinery");
-    var sPowerPlant = localStorage.getItem("PowerPlant");
-    var sLaborCost = localStorage.getItem("LaborCost");
-    var sWoodStop = localStorage.getItem("WoodStop");
-    var sEnergyStop = localStorage.getItem("EnergyStop");
-    var sGasolineStop = localStorage.getItem("GasolineStop");
-    var sWaterStop = localStorage.getItem("WaterStop");
-    var sAutoComplete = localStorage.getItem("AutoComplete");
-    var sStartSelling = localStorage.getItem("StartSelling");
-    var sCollectTownCoin = localStorage.getItem("CollectTownCoin");
+    let sNightUpdate = localStorage.getItem("NightUpdate");
+    let sLumberMill = localStorage.getItem("LumberMill");
+    let sWaterFacility = localStorage.getItem("WaterFacility");
+    let sRefinery = localStorage.getItem("Refinery");
+    let sPowerPlant = localStorage.getItem("PowerPlant");
+    let sLaborCost = localStorage.getItem("LaborCost");
+    let sWoodStop = localStorage.getItem("WoodStop");
+    let sEnergyStop = localStorage.getItem("EnergyStop");
+    let sGasolineStop = localStorage.getItem("GasolineStop");
+    let sWaterStop = localStorage.getItem("WaterStop");
+    let sAutoComplete = localStorage.getItem("AutoComplete");
+    let sStartSelling = localStorage.getItem("StartSelling");
+    let sCollectTownCoin = localStorage.getItem("CollectTownCoin");
 
-    var bothItemList = document.createElement("DIV");
-    var allItemsList = document.createElement("DIV");
-    var activeItemsList = document.createElement("DIV");
+    let bothItemList = document.createElement("DIV");
+    let allItemsList = document.createElement("DIV");
+    let activeItemsList = document.createElement("DIV");
 
     bothItemList.setAttribute("style", "height:45%;");
 
@@ -334,10 +327,10 @@
     if (localStorage.getItem("allItemsList")) {
       allItemsList.innerHTML = localStorage.getItem("allItemsList");
     } else {
-      for (var key in Game.craftData) {
+      for (let key in Game.craftData) {
         const item = Game.craftData[key];
-        var option = document.createElement("DIV");
-        var itemInfo =
+        let option = document.createElement("DIV");
+        let itemInfo =
           key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
         option.innerText = key;
         option.title = itemInfo;
@@ -359,25 +352,25 @@
     bothItemList.append(allItemsList);
     bothItemList.append(activeItemsList);
 
-    var node = document.createElement("DIV");
-    var Loadbtn = document.createElement("BUTTON");
+    let node = document.createElement("DIV");
+    let Loadbtn = document.createElement("BUTTON");
 
-    var node2 = document.createElement("DIV");
-    var Savebtn = document.createElement("BUTTON");
-    var lumberMillCheckBox = document.createElement("Input");
-    var nightUpdateCheckBox = document.createElement("Input");
-    var waterFacilityCheckBox = document.createElement("Input");
-    var RefineryCheckBox = document.createElement("Input");
-    var PowerPlantCheckBox = document.createElement("Input");
-    var AutoCompleteCheckBox = document.createElement("Input");
-    var LaborCost = document.createElement("Input");
-    var WoodStop = document.createElement("Input");
-    var EnergyStop = document.createElement("Input");
-    var GasolineStop = document.createElement("Input");
-    var WaterStop = document.createElement("Input");
-    var CollectTownCoinCheckBox = document.createElement("Input");
+    let node2 = document.createElement("DIV");
+    let Savebtn = document.createElement("BUTTON");
+    let lumberMillCheckBox = document.createElement("Input");
+    let nightUpdateCheckBox = document.createElement("Input");
+    let waterFacilityCheckBox = document.createElement("Input");
+    let RefineryCheckBox = document.createElement("Input");
+    let PowerPlantCheckBox = document.createElement("Input");
+    let AutoCompleteCheckBox = document.createElement("Input");
+    let LaborCost = document.createElement("Input");
+    let WoodStop = document.createElement("Input");
+    let EnergyStop = document.createElement("Input");
+    let GasolineStop = document.createElement("Input");
+    let WaterStop = document.createElement("Input");
+    let CollectTownCoinCheckBox = document.createElement("Input");
 
-    var StartSellingCheckBox = document.createElement("Input");
+    let StartSellingCheckBox = document.createElement("Input");
     Loadbtn.setAttribute("id", "configBtn");
     Loadbtn.textContent = "Open";
     Loadbtn.onclick = LoadConfig;
@@ -548,8 +541,8 @@
     node.appendChild(Loadbtn);
     node2.id = "ConfigDiv";
 
-    var x = document.createElement("STRONG");
-    var t = document.createTextNode("Items:");
+    let x = document.createElement("STRONG");
+    let t = document.createTextNode("Items:");
     x.appendChild(t);
 
     node2.append(x);
@@ -619,19 +612,19 @@
     allItemsList = document.getElementById("allItemsList");
     activeItemsList = document.getElementById("activeItemsList");
 
-    var sortAll = Sortable.create(allItemsList, {
+    Sortable.create(allItemsList, {
       group: {
         name: "shared",
       },
-      onSort: (evt) => {
+      onSort: (_evt) => {
         localStorage.setItem("allItemsList", allItemsList.innerHTML);
       },
       animation: 150,
       sort: false, // To disable sorting: set sort to false
     });
-    var sortActive = Sortable.create(activeItemsList, {
+    Sortable.create(activeItemsList, {
       group: "shared",
-      onSort: (evt) => {
+      onSort: (_evt) => {
         localStorage.setItem("activeItemsList", activeItemsList.innerHTML);
       },
       onAdd: (evt) => {
@@ -682,36 +675,36 @@
     }, 10000);
 
     window.mySellTimer = setInterval(function () {
-      var depotObjArray = Object.values(Game.town.objectDict).filter(
+      let depotObjArray = Object.values(Game.town.objectDict).filter(
         (o) => o.logicType === "Trade"
       );
-      var waterFacilityArray = Object.values(Game.town.objectDict).filter(
+      let waterFacilityArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Water_Facility"
       );
-      var powerPlantArray = Object.values(Game.town.objectDict).filter(
+      let powerPlantArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Power_Plant" || o.type === "Nuclear_Power"
       );
-      var lumberMillArray = Object.values(Game.town.objectDict).filter(
+      let lumberMillArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Lumber_Mill"
       );
-      var constructionSiteArray = Object.values(Game.town.objectDict).filter(
+      let constructionSiteArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Construction_Site"
       );
       //ToDo: If storage is full check if you can sell something
-      var storageArray = Object.values(Game.town.objectDict).filter(
+      let storageArray = Object.values(Game.town.objectDict).filter(
         (o) => o.logicType === "Storage"
       );
 
-      var refineryArray = Object.values(Game.town.objectDict).filter(
+      let refineryArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Refinery"
       );
 
-      var isConstructionNeedWood = false;
-      var depotObj = "";
-      var busyDepotKey = "";
-      var depotKey = "";
-      var busyDepot = [];
-      var i, j;
+      let isConstructionNeedWood = false;
+      let depotObj = "";
+      let busyDepotKey = "";
+      let depotKey = "";
+      let busyDepot = [];
+      let i, j;
 
       if (CollectTownCoinCheckBox.checked) {
         collectTownCoinIfNeedet();
@@ -739,11 +732,11 @@
                   constructionSiteArray[i].logicObject.constructionData.reqs
                     .Wood
               ) {
-                var parsedWoodRequired = parseInt(
+                let parsedWoodRequired = parseInt(
                   constructionSiteArray[i].logicObject.constructionData.reqs
                     .Wood
                 );
-                var parsedWoodRecived = parseInt(
+                let parsedWoodRecived = parseInt(
                   constructionSiteArray[i].logicObject.data.receivedCrafts.Wood
                 );
 
@@ -875,12 +868,17 @@
       }
 
       if (lumberMillArray.length > 0 && lumberMillCheckBox.checked) {
+        let woodAmount = Game.town.GetStoredCrafts()["Wood"];
+        if (isNaN(woodAmount)) {
+          woodAmount = 0;
+        }
+
         if (localStorage.getItem("debug") === 'true') {
           console.log(woodInNeed + parseInt(WoodStop.value));
-          console.log(Game.town.GetStoredCrafts().Wood);
+          console.log(woodAmount);
         }
         if (
-          Game.town.GetStoredCrafts()["Wood"] <= WoodStop.value ||
+          woodAmount <= WoodStop.value ||
           isConstructionNeedWood
         ) {
           for (i = 0; i < lumberMillArray.length; i++) {
@@ -916,11 +914,11 @@
             "0, " +
             Game.town.tradesList[j].source.z +
             "]";
-          var startTime = new Date(Game.town.tradesList[j].startTime);
-          var endTime = new Date(
+            let startTime = new Date(Game.town.tradesList[j].startTime);
+            let endTime = new Date(
             startTime.getTime() + Game.town.tradesList[j].duration
           );
-          var currentTime = new Date();
+          let currentTime = new Date();
           if (localStorage.getItem("debug") === 'true') {
             console.log("Depot Busy -- " + busyDepotKey);
           }
@@ -940,11 +938,11 @@
       }
 
       if (Game.town.GetStoredCrafts()["Gasoline"] > 0) {
-        var itemtoSell;
-        var nCountItem;
+        let itemtoSell;
+        let nCountItem;
 
-        var activeItemsList = document.getElementById("activeItemsList");
-        var craftedItem = activeItemsList.getElementsByTagName("DIV");
+        let activeItemsList = document.getElementById("activeItemsList");
+        let craftedItem = activeItemsList.getElementsByTagName("DIV");
 
         for (i = 0; i < craftedItem.length; i++) {
           itemtoSell = craftedItem[i].getAttribute("data-key");
