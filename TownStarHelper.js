@@ -57,8 +57,6 @@
     }
 
     if (typeof Game != "undefined" && Game.town != null) {
-      localStorage.setItem("debug", false);
-
       if (trackingActive == 0) {
         trackingActive = 1;
         LoadProductionMonitor();
