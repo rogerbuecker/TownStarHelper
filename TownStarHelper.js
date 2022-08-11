@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.8
-// @description  Town Star Helper DEV
+// @version      0.9
+// @description  Town Star Helper fix wood in need
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
 // @grant        GM_setValue
@@ -20,6 +20,7 @@
   var trackedItems = [];
   let sellingActive = 0;
   let trackingActive = 0;
+  let updateActive = 0;
 
   new MutationObserver(function (_mutations) {
     let airdropcollected = 0;
@@ -87,41 +88,66 @@
   }).observe(document, { attributes: true, childList: true, subtree: true });
 
   function update(fromType, toType) {
-    if(Game.currency > 150000 && Object.values(Game.town.objectDict).filter((o) => o.type === "Construction_Site").length < 1){
-        var currentConstructionSites = Object.values(Game.town.objectDict).filter(
-            (o) => o.type === "Construction_Site" && o.data.type === toType
-        );
+    if (updateActive === 0) {
+      updateActive = Date.now();
+    }
 
-        var update = Object.values(Game.town.objectDict).filter(
-            (o) => o.type === fromType
-        );
+    let differenceSinceUpdate = Math.round((Date.now() - updateActive) / 1000);
+    console.log("UpdateActive: " + differenceSinceUpdate.toString());
 
-        if (currentConstructionSites.length <= 0 && update.length > 0) {
-            let randomIndex = Math.floor(Math.random() * update.length);
-            let upgradeCost = Game.objectData[toType].BuildCost - Game.objectData[fromType].DestroyCost;
-            if (localStorage.getItem("debug")) {
-                console.log("Update from " + fromType + " to " + toType);
-                console.log("Cost" + upgradeCost);
-            }
+    if (
+      differenceSinceUpdate >= 500 &&
+      Game.currency > 180000 &&
+      Object.values(Game.town.objectDict).filter(
+        (o) => o.type === "Construction_Site"
+      ).length < 1
+    ) {
+      var currentConstructionSites = Object.values(Game.town.objectDict).filter(
+        (o) => o.type === "Construction_Site" && o.data.type === toType
+      );
 
-            Game.addCurrency(-1 * upgradeCost);
+      var update = Object.values(Game.town.objectDict).filter(
+        (o) => o.type === fromType
+      );
 
-            Game.town.RemoveObject(
-                update[randomIndex].townX,
-                update[randomIndex].townZ,
-            !1
-            );
-            Game.town.AddObject(
-            "Construction_Site",
-            update[randomIndex].townX,
-            update[randomIndex].townZ,
-            0,
-            {
-                type: toType,
-            }
-            );
-            LEDGER.buyObject(update[randomIndex].townX, update[randomIndex].townZ, toType, { currency: upgradeCost });
+      if (currentConstructionSites.length <= 0 && update.length > 0) {
+        let randomIndex = Math.floor(Math.random() * update.length);
+        let upgradeCost =
+          Game.objectData[toType].BuildCost -
+          Game.objectData[fromType].DestroyCost;
+        if (localStorage.getItem("debug")) {
+          console.log("Update from " + fromType + " to " + toType);
+          console.log("Cost" + upgradeCost);
+          console.log("X" + update[randomIndex].townX);
+          console.log("Y" + update[randomIndex].townZ);
         }
+
+        Game.addCurrency(-1 * upgradeCost);
+        LEDGER.buyObject(
+          update[randomIndex].townX,
+          update[randomIndex].townZ,
+          toType,
+          { currency: upgradeCost }
+        );
+        Game.town.removeObject(
+          update[randomIndex].townX,
+          update[randomIndex].townZ,
+          !1,
+          !0
+        );
+        Game.town.addObject(
+          "Construction_Site",
+          update[randomIndex].townX,
+          update[randomIndex].townZ,
+          0,
+          {
+            type: toType,
+          },
+          !0
+        );
+
+        updateActive = Date.now();
+      }
     }
   }
 
@@ -143,9 +169,9 @@
     document.getElementById("ConfigDiv").style.visibility = "hidden";
     document.getElementById("configBtn").style.display = "block";
     localStorage.setItem(
-        "NightUpdate",
-        document.getElementById("NightUpdateCheckBox").checked
-      );
+      "NightUpdate",
+      document.getElementById("NightUpdateCheckBox").checked
+    );
     localStorage.setItem(
       "LumberMill",
       document.getElementById("LumberMillCheckBox").checked
@@ -680,8 +706,8 @@
         collectTownCoinIfNeedet();
       }
 
+      var woodInNeed = 0;
       if (constructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
-        var woodInNeed = 0;
         for (i = 0; i < constructionSiteArray.length; i++) {
           if (constructionSiteArray[i].logicObject.data.state == "Complete") {
             if (
@@ -717,7 +743,11 @@
                   parsedWoodRecived = 0;
                 }
                 woodInNeed += parsedWoodRequired - parsedWoodRecived;
-
+                if (localStorage.getItem("debug")) {
+                  console.log("wood in need " + woodInNeed);
+                  console.log("wood required " + parsedWoodRequired);
+                  console.log("wood recived " + parsedWoodRecived);
+                }
               }
             }
           }
@@ -811,28 +841,33 @@
         }
       }
 
-      if(nightUpdateCheckBox.checked){
+      if (nightUpdateCheckBox.checked) {
+        //update("Dirt_Road", "Paved_Road");
         let magicFairydice = Math.floor(Math.random() * 4);
         switch (magicFairydice) {
-            case 0:
-              update("Dirt_Road", "Paved_Road");
-              break;
-            case 1:
-              update("Lumberjack_House", "The_Logger_House");
-              break;
-            case 2:
-              update("Farm_House", "Farm_Tractor");
-              break;
-            case 3:
-              update("Ranch_House", "ATV");
-              break;
-            default:
-              console.log('updateSometingError ' + magicFairydice);
-              break;
-          }
+          case 0:
+            update("Dirt_Road", "Paved_Road");
+            break;
+          case 1:
+            update("Lumberjack_House", "The_Logger_House");
+            break;
+          case 2:
+            update("Farm_House", "Farm_Tractor");
+            break;
+          case 3:
+            update("Ranch_House", "ATV");
+            break;
+          default:
+            console.log("updateSometingError " + magicFairydice);
+            break;
+        }
       }
 
       if (lumberMillArray.length > 0 && lumberMillCheckBox.checked) {
+        if (localStorage.getItem("debug")) {
+          console.log(woodInNeed + parseInt(WoodStop.value));
+          console.log(Game.town.GetStoredCrafts().Wood);
+        }
         if (
           Game.town.GetStoredCrafts()["Wood"] <= WoodStop.value ||
           isConstructionNeedWood
@@ -841,7 +876,7 @@
             if (
               lumberMillArray[i].logicObject.data.craft == "Lumber" &&
               lumberMillArray[i].logicObject.data.state != "Produce" &&
-              lumberMillArray[i].logicObject.data.reqList.Wood > 4
+              lumberMillArray[i].logicObject.data.reqList.Wood > 3
             ) {
               if (localStorage.getItem("debug")) {
                 console.log("Turning off Lumber Mill");
