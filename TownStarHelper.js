@@ -102,7 +102,9 @@
     }
 
     let differenceSinceUpdate = Math.round((Date.now() - updateActive) / 1000);
-    console.log("UpdateActive: " + differenceSinceUpdate.toString());
+    if (localStorage.getItem("debug") === 'true') {
+      console.log("UpdateActive: " + differenceSinceUpdate.toString());
+    }
 
     if (
       differenceSinceUpdate >= 500 &&
@@ -856,7 +858,9 @@
             update("Ranch_House", "ATV");
             break;
           default:
-            console.log("updateSometingError " + magicFairydice);
+            if (localStorage.getItem("debug") === 'true') {
+              console.log("updateSometingError " + magicFairydice);
+            }
             break;
         }
       }
