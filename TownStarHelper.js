@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.9
-// @description  Town Star Helper fix wood in need
+// @version      0.9.2
+// @description  Town Star Helper fix close popup
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
 // @grant        GM_setValue
@@ -79,6 +79,17 @@
               )
               .click();
           }
+          if (
+            document.querySelector(
+              "#motd > div > div > div > div > div.header-row > button"
+            )
+          ) {
+            document
+              .querySelector(
+                "#motd > div > div > div > div > div.header-row > button"
+              )
+              .click();
+          }
         }, 2000);
 
         sellingActive = 1;
@@ -115,7 +126,7 @@
         let upgradeCost =
           Game.objectData[toType].BuildCost -
           Game.objectData[fromType].DestroyCost;
-        if (localStorage.getItem("debug")) {
+        if (localStorage.getItem("debug") === 'true') {
           console.log("Update from " + fromType + " to " + toType);
           console.log("Cost" + upgradeCost);
           console.log("X" + update[randomIndex].townX);
@@ -222,11 +233,11 @@
     let challenge = await Game.challenge;
     if (challenge) {
       if (!challenge.claimed) {
-        if (localStorage.getItem("debug")) {
+        if (localStorage.getItem("debug") === 'true') {
           console.log("collect Town Coin");
         }
         let collectEarningsResponse = await Game.collectEarnings();
-        if (localStorage.getItem("debug")) {
+        if (localStorage.getItem("debug") === 'true') {
           console.log(collectEarningsResponse.message);
         }
       }
@@ -234,7 +245,7 @@
   }
 
   function LoadProductionMonitor() {
-    if (localStorage.getItem("debug")) {
+    if (localStorage.getItem("debug") === 'true') {
       console.log("LoadProductionMonitor");
     }
     class TrackUnitDeliverOutputTask extends UnitDeliverOutputTask {
@@ -743,7 +754,8 @@
                   parsedWoodRecived = 0;
                 }
                 woodInNeed += parsedWoodRequired - parsedWoodRecived;
-                if (localStorage.getItem("debug")) {
+
+                if (localStorage.getItem("debug") === 'true') {
                   console.log("wood in need " + woodInNeed);
                   console.log("wood required " + parsedWoodRequired);
                   console.log("wood recived " + parsedWoodRecived);
@@ -770,7 +782,7 @@
               waterFacilityArray[i].logicObject.data.craft == "Water_Drum" &&
               waterFacilityArray[i].logicObject.data.state != "Produce"
             ) {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning off Water Facility");
               }
               waterFacilityArray[i].logicObject.SetCraft("None");
@@ -779,7 +791,7 @@
         } else {
           for (i = 0; i < waterFacilityArray.length; i++) {
             if (waterFacilityArray[i].logicObject.data.craft == "None") {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning on Water Facility");
               }
               waterFacilityArray[i].logicObject.SetCraft("Water_Drum");
@@ -795,7 +807,7 @@
               powerPlantArray[i].logicObject.data.craft == "Energy" &&
               powerPlantArray[i].logicObject.data.state != "Produce"
             ) {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning off Power Plant");
               }
               powerPlantArray[i].logicObject.SetCraft("None");
@@ -804,7 +816,7 @@
         } else {
           for (i = 0; i < powerPlantArray.length; i++) {
             if (powerPlantArray[i].logicObject.data.craft == "None") {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning on Power Plant");
               }
               powerPlantArray[i].logicObject.SetCraft("Energy");
@@ -820,7 +832,7 @@
               refineryArray[i].logicObject.data.craft == "Gasoline" &&
               refineryArray[i].logicObject.data.state != "Produce"
             ) {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Switch Refinery to Jet Fuel");
               }
               refineryArray[i].logicObject.SetCraft("Jet_Fuel");
@@ -832,7 +844,7 @@
               refineryArray[i].logicObject.data.craft == "Jet_Fuel" &&
               refineryArray[i].logicObject.data.state != "Produce"
             ) {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Switch Refinery to Gasolin");
               }
               refineryArray[i].logicObject.SetCraft("Gasoline");
@@ -842,7 +854,6 @@
       }
 
       if (nightUpdateCheckBox.checked) {
-        //update("Dirt_Road", "Paved_Road");
         let magicFairydice = Math.floor(Math.random() * 4);
         switch (magicFairydice) {
           case 0:
@@ -864,7 +875,7 @@
       }
 
       if (lumberMillArray.length > 0 && lumberMillCheckBox.checked) {
-        if (localStorage.getItem("debug")) {
+        if (localStorage.getItem("debug") === 'true') {
           console.log(woodInNeed + parseInt(WoodStop.value));
           console.log(Game.town.GetStoredCrafts().Wood);
         }
@@ -878,7 +889,7 @@
               lumberMillArray[i].logicObject.data.state != "Produce" &&
               lumberMillArray[i].logicObject.data.reqList.Wood > 3
             ) {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning off Lumber Mill");
               }
               lumberMillArray[i].logicObject.SetCraft("None");
@@ -887,7 +898,7 @@
         } else {
           for (i = 0; i < lumberMillArray.length; i++) {
             if (lumberMillArray[i].logicObject.data.craft == "None") {
-              if (localStorage.getItem("debug")) {
+              if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning on Lumber Mill");
               }
               lumberMillArray[i].logicObject.SetCraft("Lumber");
@@ -910,18 +921,18 @@
             startTime.getTime() + Game.town.tradesList[j].duration
           );
           var currentTime = new Date();
-          if (localStorage.getItem("debug")) {
+          if (localStorage.getItem("debug") === 'true') {
             console.log("Depot Busy -- " + busyDepotKey);
           }
           if (currentTime.getTime() - endTime.getTime() > 1000) {
             busyDepot.push(busyDepotKey);
-            if (localStorage.getItem("debug")) {
+            if (localStorage.getItem("debug") === 'true') {
               console.log("Depot Busy -- " + busyDepotKey);
             }
             Game.town.objectDict[busyDepotKey].logicObject.OnTapped();
           } else {
             busyDepot.push(busyDepotKey);
-            if (localStorage.getItem("debug")) {
+            if (localStorage.getItem("debug") === 'true') {
               console.log("Depot Busy -- " + busyDepotKey);
             }
           }
