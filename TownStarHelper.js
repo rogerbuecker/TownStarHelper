@@ -690,10 +690,6 @@
       let constructionSiteArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Construction_Site"
       );
-      //ToDo: If storage is full check if you can sell something
-      let storageArray = Object.values(Game.town.objectDict).filter(
-        (o) => o.logicType === "Storage"
-      );
 
       let refineryArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Refinery"
@@ -710,7 +706,7 @@
         collectTownCoinIfNeedet();
       }
 
-      var woodInNeed = 0;
+      let woodInNeed = 0;
       if (constructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
         for (i = 0; i < constructionSiteArray.length; i++) {
           if (constructionSiteArray[i].logicObject.data.state == "Complete") {
@@ -885,7 +881,7 @@
             if (
               lumberMillArray[i].logicObject.data.craft == "Lumber" &&
               lumberMillArray[i].logicObject.data.state != "Produce" &&
-              lumberMillArray[i].logicObject.data.reqList.Wood > 3
+              lumberMillArray[i].logicObject.data.reqList.Wood > 4
             ) {
               if (localStorage.getItem("debug") === 'true') {
                 console.log("Turning off Lumber Mill");
