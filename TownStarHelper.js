@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Town Star Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.9.3
-// @description  Town Star Helper fix update
+// @version      0.9.4
+// @description  Town Star Helper Add Portal Configuration (on|off)
 // @author       Roger - Modify from exisiting scripts from  Groove
 // @match        https://townstar.sandbox-games.com/*
 // @grant        GM_setValue
@@ -190,6 +190,14 @@
       document.getElementById("WaterFacilityCheckBox").checked
     );
     localStorage.setItem(
+      "Silica",
+      document.getElementById("SilicaCheckBox").checked
+    );
+    localStorage.setItem(
+      "Portal",
+      document.getElementById("PortalCheckBox").checked
+    );
+    localStorage.setItem(
       "Refinery",
       document.getElementById("RefineryCheckBox").checked
     );
@@ -216,6 +224,14 @@
     localStorage.setItem(
       "WaterStop",
       Number(document.getElementById("WaterStop").value)
+    );
+    localStorage.setItem(
+      "SilicaStop",
+      Number(document.getElementById("SilicaStop").value)
+    );
+    localStorage.setItem(
+      "PortalStop",
+      Number(document.getElementById("PortalStop").value)
     );
     localStorage.setItem(
       "AutoComplete",
@@ -302,28 +318,12 @@
     };
   }
 
-  function refreshItemList() {
-    bothItemList.innerHTML = "";
-    activeItemsList.innerHTML = "";
-    
-    for (let key in Game.craftData) {
-      const item = Game.craftData[key];
-      let option = document.createElement("DIV");
-      let itemInfo = key + " " + item.CityPoints + "pt " + item.CityPrice + "$";
-      option.innerText = key;
-      option.title = itemInfo;
-      option.setAttribute("data-key", key);
-      allItemsList.appendChild(option);
-    }
-
-    bothItemList.replace(allItemsList);
-    bothItemList.replace(activeItemsList);
-  }
-
   function activateSelling() {
     let sNightUpdate = localStorage.getItem("NightUpdate");
     let sLumberMill = localStorage.getItem("LumberMill");
     let sWaterFacility = localStorage.getItem("WaterFacility");
+    let sSilica = localStorage.getItem("Silica");
+    let sPortal = localStorage.getItem("Portal");
     let sRefinery = localStorage.getItem("Refinery");
     let sPowerPlant = localStorage.getItem("PowerPlant");
     let sLaborCost = localStorage.getItem("LaborCost");
@@ -331,6 +331,8 @@
     let sEnergyStop = localStorage.getItem("EnergyStop");
     let sGasolineStop = localStorage.getItem("GasolineStop");
     let sWaterStop = localStorage.getItem("WaterStop");
+    let sSilicaStop = localStorage.getItem("SilicaStop");
+    let sPortalStop = localStorage.getItem("PortalStop");
     let sAutoComplete = localStorage.getItem("AutoComplete");
     let sStartSelling = localStorage.getItem("StartSelling");
     let sCollectTownCoin = localStorage.getItem("CollectTownCoin");
@@ -380,29 +382,27 @@
 
     let node2 = document.createElement("DIV");
     let Savebtn = document.createElement("BUTTON");
-    let Refreshbtm = document.createElement("BUTTON");
-
     let lumberMillCheckBox = document.createElement("Input");
     let nightUpdateCheckBox = document.createElement("Input");
     let waterFacilityCheckBox = document.createElement("Input");
+    let silicaCheckBox = document.createElement("Input");
+    let portalCheckBox = document.createElement("Input");
     let RefineryCheckBox = document.createElement("Input");
-    let PowerPlantCheckBox = document.createElement("Input");
-    let AutoCompleteCheckBox = document.createElement("Input");
+    let powerPlantCheckBox = document.createElement("Input");
+    let autoCompleteCheckBox = document.createElement("Input");
     let LaborCost = document.createElement("Input");
     let WoodStop = document.createElement("Input");
     let EnergyStop = document.createElement("Input");
     let GasolineStop = document.createElement("Input");
     let WaterStop = document.createElement("Input");
+    let SilicaStop = document.createElement("Input");
+    let PortalStop = document.createElement("Input");
     let CollectTownCoinCheckBox = document.createElement("Input");
 
     let StartSellingCheckBox = document.createElement("Input");
     Loadbtn.setAttribute("id", "configBtn");
     Loadbtn.textContent = "Open";
     Loadbtn.onclick = LoadConfig;
-
-    Refreshbtm.setAttribute("id", "refreshBtn");
-    Refreshbtm.textContent = "Refresh List";
-    Refreshbtm.onclick = refreshItemList;
 
     Savebtn.setAttribute("id", "Savebtn");
     Savebtn.textContent = "Close config";
@@ -441,14 +441,36 @@
       }
     }
 
-    PowerPlantCheckBox.type = "checkbox";
-    PowerPlantCheckBox.style.height = "12px";
-    PowerPlantCheckBox.setAttribute("id", "PowerPlantCheckBox");
+    silicaCheckBox.type = "checkbox";
+    silicaCheckBox.style.height = "12px";
+    silicaCheckBox.setAttribute("id", "SilicaCheckBox");
+    if (sSilica != null) {
+      if (sSilica == "false") {
+        silicaCheckBox.checked = false;
+      } else {
+        silicaCheckBox.checked = true;
+      }
+    }
+
+    portalCheckBox.type = "checkbox";
+    portalCheckBox.style.height = "12px";
+    portalCheckBox.setAttribute("id", "PortalCheckBox");
+    if (sPortal != null) {
+      if (sPortal == "false") {
+        portalCheckBox.checked = false;
+      } else {
+        portalCheckBox.checked = true;
+      }
+    }
+
+    powerPlantCheckBox.type = "checkbox";
+    powerPlantCheckBox.style.height = "12px";
+    powerPlantCheckBox.setAttribute("id", "PowerPlantCheckBox");
     if (sPowerPlant != null) {
       if (sPowerPlant == "false") {
-        PowerPlantCheckBox.checked = false;
+        powerPlantCheckBox.checked = false;
       } else {
-        PowerPlantCheckBox.checked = true;
+        powerPlantCheckBox.checked = true;
       }
     }
 
@@ -463,14 +485,14 @@
       }
     }
 
-    AutoCompleteCheckBox.type = "checkbox";
-    AutoCompleteCheckBox.style.height = "12px";
-    AutoCompleteCheckBox.setAttribute("id", "AutoCompleteCheckBox");
+    autoCompleteCheckBox.type = "checkbox";
+    autoCompleteCheckBox.style.height = "12px";
+    autoCompleteCheckBox.setAttribute("id", "AutoCompleteCheckBox");
     if (sAutoComplete != null) {
       if (sAutoComplete == "false") {
-        AutoCompleteCheckBox.checked = false;
+        autoCompleteCheckBox.checked = false;
       } else {
-        AutoCompleteCheckBox.checked = true;
+        autoCompleteCheckBox.checked = true;
       }
     }
 
@@ -544,6 +566,34 @@
       WaterStop.value = Number(sWaterStop);
     }
 
+    SilicaStop.type = "number";
+    SilicaStop.style.height = "10px";
+    SilicaStop.style.width = "50px";
+    SilicaStop.style.fontSize = "12px";
+    SilicaStop.style.padding = "4px";
+    SilicaStop.style.marginLeft = "5px";
+    SilicaStop.style.borderRadius = "0px";
+    SilicaStop.style.textAlign = "right";
+    SilicaStop.setAttribute("id", "SilicaStop");
+    SilicaStop.value = 10;
+    if (sSilicaStop != null) {
+      SilicaStop.value = Number(sSilicaStop);
+    }
+
+    PortalStop.type = "number";
+    PortalStop.style.height = "10px";
+    PortalStop.style.width = "50px";
+    PortalStop.style.fontSize = "12px";
+    PortalStop.style.padding = "4px";
+    PortalStop.style.marginLeft = "5px";
+    PortalStop.style.borderRadius = "0px";
+    PortalStop.style.textAlign = "right";
+    PortalStop.setAttribute("id", "PortalStop");
+    PortalStop.value = 3000000;
+    if (PortalStop != null) {
+      PortalStop.value = Number(sPortalStop);
+    }
+
     StartSellingCheckBox.type = "checkbox";
     StartSellingCheckBox.style.height = "12px";
     StartSellingCheckBox.setAttribute("id", "StartSellingCheckBox");
@@ -576,7 +626,6 @@
 
     node2.append(x);
     node2.append(bothItemList);
-    node2.append(Refreshbtm);
 
     node2.setAttribute(
       "style",
@@ -602,8 +651,22 @@
     node2.appendChild(WaterStop);
 
     node2.appendChild(document.createElement("hr"));
+    node2.append("Turn on/off Silica :");
+    node2.appendChild(silicaCheckBox);
+    node2.appendChild(document.createElement("br"));
+    node2.append("Silica to stop :");
+    node2.appendChild(SilicaStop);
+
+    node2.appendChild(document.createElement("hr"));
+    node2.append("Turn on/off Portal :");
+    node2.appendChild(portalCheckBox);
+    node2.appendChild(document.createElement("br"));
+    node2.append("Stop if cash is less then :");
+    node2.appendChild(PortalStop);
+
+    node2.appendChild(document.createElement("hr"));
     node2.append("Turn on/off PowerPlant :");
-    node2.appendChild(PowerPlantCheckBox);
+    node2.appendChild(powerPlantCheckBox);
     node2.appendChild(document.createElement("br"));
     node2.append("Energy to stop :");
     node2.appendChild(EnergyStop);
@@ -617,7 +680,7 @@
 
     node2.appendChild(document.createElement("hr"));
     node2.append("Auto Complete Construction Site :");
-    node2.appendChild(AutoCompleteCheckBox);
+    node2.appendChild(autoCompleteCheckBox);
     node2.appendChild(document.createElement("br"));
     node2.append("Labor Cost :");
     node2.appendChild(LaborCost);
@@ -711,6 +774,12 @@
       let waterFacilityArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Water_Facility"
       );
+      let silicaArray = Object.values(Game.town.objectDict).filter(
+        (o) => o.type === "Sand_Mine"
+      );
+      let portalArray = Object.values(Game.town.objectDict).filter(
+        (o) => o.type === "Portal"
+      );
       let powerPlantArray = Object.values(Game.town.objectDict).filter(
         (o) => o.type === "Power_Plant" || o.type === "Nuclear_Power"
       );
@@ -737,7 +806,7 @@
       }
 
       let woodInNeed = 0;
-      if (constructionSiteArray.length > 0 && AutoCompleteCheckBox.checked) {
+      if (constructionSiteArray.length > 0 && autoCompleteCheckBox.checked) {
         for (i = 0; i < constructionSiteArray.length; i++) {
           if (constructionSiteArray[i].logicObject.data.state == "Complete") {
             if (
@@ -819,7 +888,57 @@
         }
       }
 
-      if (powerPlantArray.length > 0 && PowerPlantCheckBox.checked) {
+      if (silicaArray.length > 0 && silicaCheckBox.checked) {
+        if (Game.town.GetStoredCrafts()["Silica"] >= SilicaStop.value) {
+          for (i = 0; i < silicaArray.length; i++) {
+            if (
+              silicaArray[i].logicObject.data.craft == "Silica" &&
+              silicaArray[i].logicObject.data.state != "Produce"
+            ) {
+              if (localStorage.getItem("debug") === "true") {
+                console.log("Turning off Silica");
+              }
+              silicaArray[i].logicObject.SetCraft("None");
+            }
+          }
+        } else {
+          for (i = 0; i < silicaArray.length; i++) {
+            if (silicaArray[i].logicObject.data.craft == "None") {
+              if (localStorage.getItem("debug") === "true") {
+                console.log("Turning on Silica");
+              }
+              silicaArray[i].logicObject.SetCraft("Silica");
+            }
+          }
+        }
+      }
+
+      if (portalArray.length > 0 && portalCheckBox.checked) {
+        if (Game.currency <= PortalStop.value) {
+          for (i = 0; i < portalArray.length; i++) {
+            if (
+              portalArray[i].logicObject.data.craft == "Silica" &&
+              portalArray[i].logicObject.data.state != "Produce"
+            ) {
+              if (localStorage.getItem("debug") === "true") {
+                console.log("Turning off Portal");
+              }
+              portalArray[i].logicObject.SetCraft("None");
+            }
+          }
+        } else {
+          for (i = 0; i < portalArray.length; i++) {
+            if (portalArray[i].logicObject.data.craft == "None") {
+              if (localStorage.getItem("debug") === "true") {
+                console.log("Turning on Portal");
+              }
+              portalArray[i].logicObject.SetCraft("Silica");
+            }
+          }
+        }
+      }
+
+      if (powerPlantArray.length > 0 && powerPlantCheckBox.checked) {
         if (Game.town.GetStoredCrafts()["Energy"] >= EnergyStop.value) {
           for (i = 0; i < powerPlantArray.length; i++) {
             if (
@@ -888,9 +1007,7 @@
             update("Ranch_House", "ATV");
             break;
           default:
-            if (localStorage.getItem("debug") === "true") {
-              console.log("updateSometingError " + magicFairydice);
-            }
+            console.log("updateSometingError " + magicFairydice);
             break;
         }
       }
@@ -979,7 +1096,10 @@
           }
         }
         if (Game.town.GetStoredCrafts()[itemtoSell] >= nCountItem) {
-          if (nCountItem >= 100) {
+          if (
+            nCountItem >= 100 &&
+            Game.town.GetStoredCrafts()["Gasoline"] > 43
+          ) {
             for (const element of depotObjArray) {
               if (element.type == "Freight_Pier") {
                 depotObj = element;
@@ -1005,7 +1125,7 @@
                 }
               }
             }
-          } else {
+          } else if (nCountItem <= 100) {
             for (const element of depotObjArray) {
               if (element.type != "Freight_Pier") {
                 depotObj = element;
